@@ -55,6 +55,15 @@ $machine = $PREVENTIVE->machine_view([$uuid]);
                 </div>
               </div>
               <div class="row mb-2">
+                <label class="col-xl-2 offset-xl-2 col-form-label">วันที่นัดหมาย</label>
+                <div class="col-xl-4">
+                  <input type="text" class="form-control form-control-sm date-select" name="date" value="<?php echo $row['appointment'] ?>" required>
+                  <div class="invalid-feedback">
+                    กรุณากรอกข้อมูล!
+                  </div>
+                </div>
+              </div>
+              <div class="row mb-2">
                 <label class="col-xl-2 offset-xl-2 col-form-label">ผู้ดำเนินการ</label>
                 <div class="col-xl-4">
                   <select class="form-control form-control-sm user-select" name="worker_id[]" multiple required>
@@ -66,15 +75,6 @@ $machine = $PREVENTIVE->machine_view([$uuid]);
                     }
                     ?>
                   </select>
-                  <div class="invalid-feedback">
-                    กรุณากรอกข้อมูล!
-                  </div>
-                </div>
-              </div>
-              <div class="row mb-2">
-                <label class="col-xl-2 offset-xl-2 col-form-label">วันที่นัดหมาย</label>
-                <div class="col-xl-4">
-                  <input type="text" class="form-control form-control-sm date-select" name="date" value="<?php echo $row['appointment'] ?>" required>
                   <div class="invalid-feedback">
                     กรุณากรอกข้อมูล!
                   </div>

@@ -47,7 +47,7 @@ class Api
   {
     $sql = "SELECT a.id,
     CONCAT('PM',YEAR(a.`start`),LPAD(a.`last`,4,'0')) ticket,
-    CONCAT(b.firstname,' ',b.lastname) username,d.name type_name,
+    CONCAT('คุณ',b.Emp_Name,' ',b.Emp_Surname) username,d.name type_name,
     a.`start`, a.`end`,a.text,
     e.`name` asset_name,c.`process` preventive_process,c.text preventive_text,
     (
@@ -59,8 +59,8 @@ class Api
       END
     ) status_name,a.created
     FROM factory.preventive_request a
-    LEFT JOIN factory.user b
-    ON a.user_id = b.id
+    LEFT JOIN demo_erp_new.employee_detail b
+    ON a.user_id = b.Emp_ID
     LEFT JOIN factory.preventive_request_item c
     ON a.id = c.request_id
     LEFT JOIN factory.asset_type d
@@ -75,7 +75,7 @@ class Api
   public function helpdesk_read()
   {
     $sql = "SELECT a.id,a.contact,a.text,
-    CONCAT(b.firstname,' ',b.lastname) username,c.`name` service_name,
+    CONCAT('คุณ',b.Emp_Name,' ',b.Emp_Surname) username,c.`name` service_name,
     d.`name` asset_name,
     (
       CASE
@@ -94,8 +94,8 @@ class Api
       ORDER BY status DESC LIMIT 1
     ) finish,a.created
     FROM factory.helpdesk_request a
-    LEFT JOIN factory.user b
-    ON a.user_id = b.id
+    LEFT JOIN demo_erp_new.employee_detail b
+    ON a.user_id = b.Emp_ID
     LEFT JOIN factory.helpdesk_service c
     ON a.service_id = c.id 
     LEFT JOIN factory.asset d

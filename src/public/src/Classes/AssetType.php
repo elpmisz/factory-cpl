@@ -138,10 +138,10 @@ class AssetType
 
   public function worker_view($data)
   {
-    $sql = "SELECT a.worker,CONCAT(b.firstname,' ',b.lastname) username
+    $sql = "SELECT a.worker,CONCAT('คุณ',b.Emp_Name,' ',b.Emp_Surname) username
     FROM factory.asset_type a
-    LEFT JOIN factory.user b
-    ON FIND_IN_SET(b.id, a.worker)
+    LEFT JOIN demo_erp_new.employee_detail b
+    ON FIND_IN_SET(b.Emp_ID, a.worker)
     WHERE a.uuid = ?";
     $stmt = $this->dbcon->prepare($sql);
     $stmt->execute($data);
@@ -152,7 +152,7 @@ class AssetType
   {
     $sql = "SELECT a.id,a.uuid,a.`name`,
     GROUP_CONCAT(b.`name`) checklist,
-    GROUP_CONCAT(c.firstname,' ',c.lastname) worker,
+    GROUP_CONCAT('คุณ',c.Emp_Name,' ',c.Emp_Surname) worker,
     IF(a.weekly = 1,'ใช่','ไม่ใช่') weekly,
     IF(a.monthly = 1,'ใช่','ไม่ใช่') monthly,
     a.`month`,
@@ -160,7 +160,7 @@ class AssetType
     FROM factory.asset_type a
     LEFT JOIN factory.asset_checklist b
     ON a.checklist = b.id
-    LEFT JOIN factory.user c
+    LEFT JOIN demo_erp_new.employee_detail c
     ON a.worker = c.id
     GROUP BY a.id";
     $stmt = $this->dbcon->prepare($sql);
@@ -186,7 +186,7 @@ class AssetType
     $draw = (isset($_POST['draw']) ? $_POST['draw'] : '');
 
     $sql = "SELECT a.id,a.uuid,a.name,GROUP_CONCAT(b.name) checklist_name,
-    GROUP_CONCAT(c.firstname,' ',c.lastname) worker,
+    GROUP_CONCAT('คุณ',c.Emp_Name,' ',c.Emp_Surname) worker,
     (
       CASE
         WHEN a.status = 1 THEN 'รายละเอียด'
@@ -204,8 +204,8 @@ class AssetType
     FROM factory.asset_type a
     LEFT JOIN factory.asset_checklist b
     ON FIND_IN_SET(b.id, a.checklist)
-    LEFT JOIN factory.user c
-    ON FIND_IN_SET(c.id, a.worker) 
+    LEFT JOIN demo_erp_new.employee_detail c
+    ON FIND_IN_SET(c.Emp_ID, a.worker) 
     WHERE a.status IN (1,2) ";
 
     if (!empty($type)) {
@@ -274,15 +274,22 @@ class AssetType
 
   public function worker_select($keyword)
   {
-    $sql = "SELECT a.login id,CONCAT(a.firstname,' ',a.lastname) text
-    FROM factory.user a
-    LEFT JOIN factory.login b
-    ON a.login = b.id
-    WHERE b.status = 1";
+    $sql = "SELECT a.Emp_ID id,CONCAT('คุณ',a.Emp_Name,' ',a.Emp_Surname) `text`
+    FROM demo_erp_new.employee_detail a
+    LEFT JOIN demo_erp_new.employee_work b
+    ON a.Emp_ID = b.Emp_ID
+    LEFT JOIN demo_erp_new.department c
+    ON b.Emp_Department = c.Dep_ID
+    LEFT JOIN demo_erp_new.employee_user d
+    ON a.Emp_ID = d.Emp_ID
+    LEFT JOIN factory.service_authorize e
+    ON a.Emp_ID = e.user_id
+    WHERE b.Emp_Department IN (88)
+    AND b.Emp_Status = 1  ";
     if (!empty($keyword)) {
-      $sql .= " AND (a.firstname LIKE '%{$keyword}%' OR a.lastname LIKE '{$keyword}') ";
+      $sql .= " AND (a.Emp_Name LIKE '%{$keyword}%' OR a.Emp_Surname LIKE '{$keyword}') ";
     }
-    $sql .= " ORDER BY a.firstname";
+    $sql .= " ORDER BY a.Emp_Name ASC";
     $stmt = $this->dbcon->prepare($sql);
     $stmt->execute();
     return $stmt->fetchAll();

@@ -31,18 +31,18 @@ include_once(__DIR__ . "/../layout/header.php");
                 </div>
               </div>
               <div class="row mb-2">
-                <label class="col-xl-2 offset-xl-2 col-form-label">ผู้ดำเนินการ</label>
+                <label class="col-xl-2 offset-xl-2 col-form-label">วันที่นัดหมาย</label>
                 <div class="col-xl-4">
-                  <select class="form-control form-control-sm user-select" name="worker_id[]" multiple required></select>
+                  <input type="text" class="form-control form-control-sm date-select" name="date" required>
                   <div class="invalid-feedback">
                     กรุณากรอกข้อมูล!
                   </div>
                 </div>
               </div>
               <div class="row mb-2">
-                <label class="col-xl-2 offset-xl-2 col-form-label">วันที่นัดหมาย</label>
+                <label class="col-xl-2 offset-xl-2 col-form-label">ผู้ดำเนินการ</label>
                 <div class="col-xl-4">
-                  <input type="text" class="form-control form-control-sm date-select" name="date" required>
+                  <select class="form-control form-control-sm user-select" name="worker_id[]" multiple required></select>
                   <div class="invalid-feedback">
                     กรุณากรอกข้อมูล!
                   </div>
@@ -75,7 +75,7 @@ include_once(__DIR__ . "/../layout/header.php");
                   </button>
                 </div>
                 <div class="col-xl-3 mb-2">
-                  <a href="/helpdesk" class="btn btn-sm btn-danger btn-block">
+                  <a href="/preventive" class="btn btn-sm btn-danger btn-block">
                     <i class="fa fa-arrow-left pr-2"></i>กลับ
                   </a>
                 </div>

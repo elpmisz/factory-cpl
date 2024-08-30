@@ -19,7 +19,7 @@ try {
     die(header("Location: /"));
   }
   $decode = JWT::decode($jwt, new Key(JWT_SECRET, JWT_ALGO));
-  $email = (isset($decode->data) ? $decode->data : "");
+  $username = (isset($decode->data) ? $decode->data : "");
 } catch (Exception $e) {
   $msg = $e->getMessage();
   if ($msg === "Expired token") {
@@ -35,7 +35,7 @@ $param = (isset($params) ? explode("/", $params) : header("Location: /error"));
 $action = (isset($param[0]) ? $param[0] : die(header("Location: /error")));
 $param1 = (isset($param[1]) ? $param[1] : "");
 $param2 = (isset($param[2]) ? $param[2] : "");
-$user = $USER->user_view($email);
+$user = $USER->user_view([$username]);
 
 if ($action === "create") {
   try {

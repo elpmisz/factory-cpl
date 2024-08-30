@@ -51,4 +51,14 @@ $card = $HELPDESK->helpdesk_card();
   </div>
 </div>
 
+<div class="row">
+  <div class="col-xl-12">
+    <div class="card shadow">
+      <div class="card-body">
+        <iframe title="sms-counter" width="100%" height="800" src="https://app.powerbi.com/view?r=eyJrIjoiZTI3NTQ3YTYtOTRhMy00NjBkLTkyNjAtNWFmZjEyMThlYjlhIiwidCI6IjcxMTY3NDI2LTFiZDYtNDY0MS1iNmUwLTY5YjRkOWI3YWU4ZCIsImMiOjEwfQ%3D%3D" frameborder="0" allowFullScreen="true"></iframe>
+      </div>
+    </div>
+  </div>
+</div>
+
 <?php include_once(__DIR__ . "/../layout/footer.php"); ?>

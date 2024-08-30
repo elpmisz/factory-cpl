@@ -17,7 +17,7 @@ class HelpdeskAuthorize
   public function authorize_count($data)
   {
     $sql = "SELECT COUNT(*) FROM factory.helpdesk_authorize
-    WHERE user = ?
+    WHERE user_id = ?
     AND type = ?";
     $stmt = $this->dbcon->prepare($sql);
     $stmt->execute($data);
@@ -26,7 +26,7 @@ class HelpdeskAuthorize
 
   public function authorize_create($data)
   {
-    $sql = "INSERT INTO factory.helpdesk_authorize( `user`, `type`) VALUES(?,?)";
+    $sql = "INSERT INTO factory.helpdesk_authorize( `user_id`, `type`) VALUES(?,?)";
     $stmt = $this->dbcon->prepare($sql);
     return $stmt->execute($data);
   }
@@ -58,7 +58,7 @@ class HelpdeskAuthorize
     $limit_length = (isset($_POST['length']) ? $_POST['length'] : '');
     $draw = (isset($_POST['draw']) ? $_POST['draw'] : '');
 
-    $sql = "SELECT a.id,CONCAT(b.firstname,' ',b.lastname) username,
+    $sql = "SELECT a.id,a.user_id,CONCAT('คุณ',b.Emp_Name,' ',b.Emp_Surname) fullname,
     (
     CASE
       WHEN a.type = 1 THEN 'ผู้อนุมัติ / ผู้ตรวจสอบ'
@@ -74,12 +74,12 @@ class HelpdeskAuthorize
     END
     ) type_color
     FROM factory.helpdesk_authorize a
-    LEFT JOIN factory.user b
-    ON a.user = b.id
+    LEFT JOIN demo_erp_new.employee_detail b
+    ON a.user_id = b.Emp_ID
     WHERE a.status = 1 ";
 
     if ($keyword) {
-      $sql .= " AND (b.firstname LIKE '%{$keyword}%' OR b.lastname LIKE '%{$keyword}%') ";
+      $sql .= " AND (b.Emp_Name LIKE '%{$keyword}%' OR b.Emp_Surname LIKE '%{$keyword}%') ";
     }
 
     if ($filter_order) {
@@ -107,7 +107,7 @@ class HelpdeskAuthorize
       $data[] = [
         $action,
         $type,
-        $row['username'],
+        $row['fullname'],
       ];
     }
 
@@ -123,15 +123,22 @@ class HelpdeskAuthorize
 
   public function user_select($keyword)
   {
-    $sql = "SELECT a.login id,CONCAT(a.firstname,' ',a.lastname) text
-    FROM factory.user a
-    LEFT JOIN factory.login b
-    ON a.login = b.id
-    WHERE b.status = 1";
+    $sql = "SELECT a.Emp_ID id,CONCAT('คุณ',a.Emp_Name,' ',a.Emp_Surname) `text`
+    FROM demo_erp_new.employee_detail a
+    LEFT JOIN demo_erp_new.employee_work b
+    ON a.Emp_ID = b.Emp_ID
+    LEFT JOIN demo_erp_new.department c
+    ON b.Emp_Department = c.Dep_ID
+    LEFT JOIN demo_erp_new.employee_user d
+    ON a.Emp_ID = d.Emp_ID
+    LEFT JOIN factory.service_authorize e
+    ON a.Emp_ID = e.user_id
+    WHERE b.Emp_Department IN (88)
+    AND b.Emp_Status = 1  ";
     if (!empty($keyword)) {
-      $sql .= " AND (a.firstname LIKE '%{$keyword}%' OR a.lastname LIKE '{$keyword}') ";
+      $sql .= " AND (a.Emp_Name LIKE '%{$keyword}%' OR a.Emp_Surname LIKE '{$keyword}') ";
     }
-    $sql .= " ORDER BY a.firstname";
+    $sql .= " ORDER BY a.Emp_Name ASC";
     $stmt = $this->dbcon->prepare($sql);
     $stmt->execute();
     return $stmt->fetchAll();

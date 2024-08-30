@@ -52,9 +52,15 @@ $machine = $PREVENTIVE->machine_view([$uuid]);
                     </div>
                   </div>
                   <div class="row mb-2">
-                    <label class="col-xl-4 col-form-label">ผู้ใช้บริการ</label>
+                    <label class="col-xl-4 col-form-label">ประเภทเครื่องจักร</label>
                     <div class="col-xl-6 text-underline">
-                      <?php echo $row['username'] ?>
+                      <?php echo $row['type_name'] ?>
+                    </div>
+                  </div>
+                  <div class="row mb-2">
+                    <label class="col-xl-4 col-form-label">วันที่นัดหมาย</label>
+                    <div class="col-xl-6 text-underline">
+                      <?php echo $row['appointment'] ?>
                     </div>
                   </div>
                 </div>
@@ -66,15 +72,15 @@ $machine = $PREVENTIVE->machine_view([$uuid]);
                       <?php echo $row['created'] ?>
                     </div>
                   </div>
+                  <div class="row mb-2">
+                    <label class="col-xl-4 col-form-label">ผู้ใช้บริการ</label>
+                    <div class="col-xl-6 text-underline">
+                      <?php echo $row['username'] ?>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div class="row mb-2">
-                <label class="col-xl-2 col-form-label">ประเภทเครื่องจักร</label>
-                <div class="col-xl-4 text-underline">
-                  <?php echo $row['type_name'] ?>
-                </div>
-              </div>
               <div class="row mb-2">
                 <label class="col-xl-2 col-form-label">ผู้ดำเนินการ</label>
                 <div class="col-xl-4 text-underline">
@@ -85,12 +91,6 @@ $machine = $PREVENTIVE->machine_view([$uuid]);
                     }
                   }
                   ?>
-                </div>
-              </div>
-              <div class="row mb-2">
-                <label class="col-xl-2 col-form-label">วันที่นัดหมาย</label>
-                <div class="col-xl-4 text-underline">
-                  <?php echo $row['appointment'] ?>
                 </div>
               </div>
 

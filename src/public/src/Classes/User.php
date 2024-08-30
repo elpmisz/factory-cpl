@@ -22,30 +22,24 @@ class User
   public function user_count($data)
   {
     $sql = "SELECT COUNT(*) 
-    FROM factory.login a
-    WHERE a.email = ?";
+    FROM demo_erp_new.employee_user a
+    WHERE a.Username = ?";
     $stmt = $this->dbcon->prepare($sql);
     $stmt->execute($data);
     return $stmt->fetchColumn();
   }
 
-  public function login_add($data)
-  {
-    $sql = "INSERT INTO factory.login(uuid,email,password) VALUES(uuid(),?,?)";
-    $stmt = $this->dbcon->prepare($sql);
-    return $stmt->execute($data);
-  }
-
-  public function user_add($data)
-  {
-    $sql = "INSERT INTO factory.user(login,firstname,lastname,contact) VALUES(?,?,?,?)";
-    $stmt = $this->dbcon->prepare($sql);
-    return $stmt->execute($data);
-  }
-
   public function user_status($data)
   {
-    $sql = "SELECT status FROM factory.login WHERE email = ?";
+    $sql = "SELECT b.Emp_Status
+    FROM demo_erp_new.employee_detail a
+    LEFT JOIN demo_erp_new.employee_work b
+    ON a.Emp_ID = b.Emp_ID
+    LEFT JOIN demo_erp_new.department c
+    ON b.Emp_Department = c.Dep_ID
+    LEFT JOIN demo_erp_new.employee_user d
+    ON a.Emp_ID = d.Emp_ID
+    WHERE d.Username = ?";
     $stmt = $this->dbcon->prepare($sql);
     $stmt->execute($data);
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -54,65 +48,78 @@ class User
 
   public function user_view($data)
   {
-    $sql = "SELECT a.id login_id,b.id user_id,a.uuid,a.email,a.password,a.level,a.auth,a.status,
-    b.firstname,b.lastname,b.contact,CONCAT(b.firstname,' ',b.lastname) fullname
-    FROM factory.login a
-    LEFT JOIN factory.user b
-    ON a.id = b.login
-    WHERE (a.email = :e OR a.uuid = :u)";
+    $sql = "SELECT a.Emp_ID user_id,a.Emp_Name firstname,a.Emp_Surname lastname,
+    CONCAT('คุณ',a.Emp_Name,' ',a.Emp_Surname) fullname,b.Emp_Department department,
+    a.Emp_Mobile contact,d.Email email,d.Username,d.P5ssword,e.service
+    FROM demo_erp_new.employee_detail a
+    LEFT JOIN demo_erp_new.employee_work b
+    ON a.Emp_ID = b.Emp_ID
+    LEFT JOIN demo_erp_new.department c
+    ON b.Emp_Department = c.Dep_ID
+    LEFT JOIN demo_erp_new.employee_user d
+    ON a.Emp_ID = d.Emp_ID
+    LEFT JOIN factory.service_authorize e
+    ON a.Emp_ID = e.user_id
+    WHERE d.Username = ?";
     $stmt = $this->dbcon->prepare($sql);
-    $stmt->execute(['e' => $data, 'u' => $data]);
+    $stmt->execute($data);
     return $stmt->fetch(PDO::FETCH_ASSOC);
+  }
+
+  public function user_update($data)
+  {
+    $sql = "UPDATE demo_erp_new.employee_detail SET 
+    Emp_Name = ?,
+    Emp_Surname = ?,
+    Emp_Mobile = ?
+    WHERE Emp_ID = ?";
+    $stmt = $this->dbcon->prepare($sql);
+    return $stmt->execute($data);
   }
 
   public function user_read()
   {
-    $sql = "SELECT a.id login_id,a.uuid,a.email,a.password,a.level,a.auth,a.status,
-    b.firstname,b.lastname,b.contact,CONCAT(b.firstname,' ',b.lastname) fullname
-    FROM factory.login a
-    LEFT JOIN factory.user b
-    ON a.id = b.login";
+    $sql = "SELECT a.Emp_ID user_id,a.Emp_Name firstname,a.Emp_Surname lastname,
+    CONCAT('คุณ',a.Emp_Name,' ',a.Emp_Surname) fullname,
+    b.Emp_Department department_id,c.Dep_Name department_name,e.service
+    FROM demo_erp_new.employee_detail a
+    LEFT JOIN demo_erp_new.employee_work b
+    ON a.Emp_ID = b.Emp_ID
+    LEFT JOIN demo_erp_new.department c
+    ON b.Emp_Department = c.Dep_ID
+    LEFT JOIN demo_erp_new.employee_user d
+    ON a.Emp_ID = d.Emp_ID
+    LEFT JOIN factory.service_authorize e
+    ON a.Emp_ID = e.user_id
+    WHERE b.Emp_Status = 1
+    AND a.Emp_ID NOT IN ('010101','020202')
+    AND (c.Company_ID = 7 OR (c.Company_ID = 2 AND (b.Emp_Department = 45 || b.position_id IN ('T'))))
+    ORDER BY c.Company_ID ASC,b.Emp_Department ASC,FIELD(b.position_id,'T','M','S','O','W'),b.Emp_Po_ID DESC";
     $stmt = $this->dbcon->prepare($sql);
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
   }
 
-  public function admin_update($data)
+  public function auth_count($data)
   {
-    $sql = "UPDATE factory.login a
-    LEFT JOIN factory.user b
-    ON a.id = b.login SET
-    a.email = ?,
-    a.level = ?,
-    a.status = ?,
-    a.updated = NOW(),
-    b.firstname = ?,
-    b.lastname = ?,
-    b.contact = ?
-    WHERE a.uuid = ?";
+    $sql = "SELECT COUNT(*) FROM factory.service_authorize WHERE user_id = ?";
     $stmt = $this->dbcon->prepare($sql);
-    return $stmt->execute($data);
+    $stmt->execute($data);
+    return $stmt->fetchColumn();
   }
 
-  public function user_update($data)
+  public function auth_add($data)
   {
-    $sql = "UPDATE factory.login a
-    LEFT JOIN factory.user b
-    ON a.id = b.login SET
-    a.updated = NOW(),
-    b.firstname = ?,
-    b.lastname = ?,
-    b.contact = ?
-    WHERE a.uuid = ?";
+    $sql = "INSERT INTO factory.service_authorize(user_id,service) VALUEs(?,?)";
     $stmt = $this->dbcon->prepare($sql);
     return $stmt->execute($data);
   }
 
   public function auth_update($data)
   {
-    $sql = "UPDATE factory.login SET
-    auth = ?
-    WHERE uuid = ?";
+    $sql = "UPDATE factory.service_authorize SET
+    service = ?
+    WHERE user_id = ?";
     $stmt = $this->dbcon->prepare($sql);
     return $stmt->execute($data);
   }
@@ -126,124 +133,13 @@ class User
     return $stmt->execute($data);
   }
 
-  public function password_default()
-  {
-    $sql = "SELECT password_default FROM factory.system WHERE id = 1";
-    $stmt = $this->dbcon->prepare($sql);
-    $stmt->execute();
-    $row = $stmt->fetch(PDO::FETCH_ASSOC);
-    return (!empty($row['password_default']) ? $row['password_default'] : "");
-  }
-
-
   public function password_change($data)
   {
-    $sql = "UPDATE factory.login SET
-    password = ?
-    WHERE uuid = ?";
+    $sql = "UPDATE demo_erp_new.employee_user SET
+    Password = ?,
+    P5ssword = ?
+    WHERE Emp_ID = ?";
     $stmt = $this->dbcon->prepare($sql);
     return $stmt->execute($data);
-  }
-
-  public function user_data()
-  {
-    $sql = "SELECT COUNT(*) FROM factory.login";
-    $stmt = $this->dbcon->prepare($sql);
-    $stmt->execute();
-    $total = $stmt->fetchColumn();
-
-    $column = ["a.status", "a.level", "a.email", "b.firstname", "b.lastname", "b.contact"];
-
-    $keyword = (isset($_POST['search']['value']) ? trim($_POST['search']['value']) : '');
-    $filter_order = (isset($_POST['order']) ? $_POST['order'] : "");
-    $order_column = (isset($_POST['order']['0']['column']) ? $_POST['order']['0']['column'] : "");
-    $order_dir = (isset($_POST['order']['0']['dir']) ? $_POST['order']['0']['dir'] : "");
-    $limit_start = (isset($_POST['start']) ? $_POST['start'] : "");
-    $limit_length = (isset($_POST['length']) ? $_POST['length'] : "");
-    $draw = (isset($_POST['draw']) ? $_POST['draw'] : "");
-
-    $sql = "SELECT a.uuid,a.email,b.firstname,b.lastname,b.contact,
-    (
-      CASE
-        WHEN a.status = 1 THEN 'ใช้งาน'
-        WHEN a.status = 2 THEN 'ระงับการใช้งาน'
-        ELSE NULL
-      END
-    ) status_name,
-    (
-      CASE
-        WHEN a.status = 1 THEN 'success'
-        WHEN a.status = 2 THEN 'danger'
-        ELSE NULL
-      END
-    ) status_color,
-    (
-      CASE
-        WHEN a.level = 1 THEN 'ผู้ใช้งาน'
-        WHEN a.level = 9 THEN 'ผู้ดูแลระบบ'
-        ELSE NULL
-      END
-    ) level_name,
-    (
-      CASE
-        WHEN a.level = 1 THEN 'info'
-        WHEN a.level = 9 THEN 'primary'
-        ELSE NULL
-      END
-    ) level_color,
-    DATE_FORMAT(a.updated, '%d/%m/%Y, %H:%i น.') updated
-    FROM factory.login a
-    LEFT JOIN factory.user b
-    ON a.id = b.login ";
-
-    if (!empty($keyword)) {
-      $sql .= " WHERE (a.email LIKE '%{$keyword}%' OR b.firstname LIKE '%{$keyword}%' OR b.lastname LIKE '%{$keyword}%' OR b.contact LIKE '%{$keyword}%') ";
-    }
-
-    if ($filter_order) {
-      $sql .= " ORDER BY {$column[$order_column]} {$order_dir} ";
-    } else {
-      $sql .= " ORDER BY a.status ASC, a.level DESC, b.firstname ASC ";
-    }
-
-    $sql2 = "";
-    if ($limit_length) {
-      $sql2 .= " LIMIT {$limit_start}, {$limit_length}";
-    }
-
-    $stmt = $this->dbcon->prepare($sql);
-    $stmt->execute();
-    $filter = $stmt->rowCount();
-    $stmt = $this->dbcon->prepare($sql . $sql2);
-    $stmt->execute();
-    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    $data = [];
-    foreach ($result as $row) {
-      $status = "<a href='/user/edit/{$row['uuid']}' class='badge badge-{$row['status_color']} font-weight-light'>{$row['status_name']}</a>";
-      $level = "<a href='javascript:void(0)' class='badge badge-{$row['level_color']} font-weight-light'>{$row['level_name']}</a>";
-      $data[] = [
-        $status,
-        $level,
-        $row['email'],
-        $row['firstname'],
-        $row['lastname'],
-        str_replace("\n", "<br>", $row['contact']),
-        $row['updated'],
-      ];
-    }
-
-    $output = [
-      "draw"    => $draw,
-      "recordsTotal"  =>  $total,
-      "recordsFiltered" => $filter,
-      "data"    => $data
-    ];
-    return $output;
-  }
-
-  public function last_insert_id()
-  {
-    return $this->dbcon->lastInsertId();
   }
 }

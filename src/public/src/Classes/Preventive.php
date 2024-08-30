@@ -31,14 +31,14 @@ class Preventive
     return $stmt->fetch();
   }
 
-  public function preventive_authorize($user, $type)
+  public function preventive_authorize($data)
   {
     $sql = "SELECT COUNT(*) 
     FROM factory.preventive_authorize 
-    WHERE user = '{$user}'
-    AND type = '{$type}' ";
+    WHERE user_id = ?
+    AND type = ?";
     $stmt = $this->dbcon->prepare($sql);
-    $stmt->execute();
+    $stmt->execute($data);
     return $stmt->fetchColumn();
   }
 
@@ -91,7 +91,7 @@ class Preventive
     $sql = "SELECT a.id,a.uuid,a.text,a.type_id,d.name type_name,
     CONCAT('PM',YEAR(a.`start`),LPAD(a.`last`,4,'0')) ticket,
     (SELECT COUNT(*) FROM factory.preventive_request_item x WHERE x.request_id = a.id) amount,
-    CONCAT(b.firstname,' ',b.lastname) username,
+    CONCAT('คุณ',b.Emp_Name,' ',b.Emp_Surname) username,
     CONCAT(DATE_FORMAT(a.`start`,'%d/%m/%Y'),' - ',DATE_FORMAT(a.`end`,'%d/%m/%Y')) appointment,
     (
       CASE
@@ -117,8 +117,8 @@ class Preventive
     ) status_color,
     DATE_FORMAT(a.created,'%d/%m/%Y, %H:%i น.') created
     FROM factory.preventive_request a
-    LEFT JOIN factory.user b
-    ON a.user_id = b.id
+    LEFT JOIN demo_erp_new.employee_detail b
+    ON a.user_id = b.Emp_ID
     LEFT JOIN factory.asset_type d
     ON a.type_id = d.id
     WHERE a.uuid = ?";
@@ -162,10 +162,10 @@ class Preventive
 
   public function worker_view($data)
   {
-    $sql = "SELECT b.id user_id,CONCAT(b.firstname,' ',b.lastname) username
+    $sql = "SELECT b.Emp_ID user_id,CONCAT('คุณ',b.Emp_Name,' ',b.Emp_Surname) username
     FROM factory.preventive_request a
-    LEFT JOIN factory.user b
-    ON FIND_IN_SET(b.id, a.worker)
+    LEFT JOIN demo_erp_new.employee_detail b
+    ON FIND_IN_SET(b.Emp_ID, a.worker)
     WHERE a.uuid = ?";
     $stmt = $this->dbcon->prepare($sql);
     $stmt->execute($data);
@@ -203,7 +203,7 @@ class Preventive
 
   public function process_view($data)
   {
-    $sql = "SELECT b.text,CONCAT(c.firstname,' ',c.lastname) worker,
+    $sql = "SELECT b.text,CONCAT('คุณ',c.Emp_Name,' ',c.Emp_Surname) worker,
     (
       CASE
         WHEN b.status = 1 THEN 'รออนุมัติ'
@@ -230,8 +230,8 @@ class Preventive
     FROM factory.preventive_request a
     LEFT JOIN factory.preventive_request_process b
     ON a.id = b.request_id
-    LEFT JOIN factory.user c
-    ON b.user_id = c.id
+    LEFT JOIN demo_erp_new.employee_detail c
+    ON b.user_id = c.Emp_ID
     WHERE a.uuid = ?
     ORDER BY b.id DESC";
     $stmt = $this->dbcon->prepare($sql);
@@ -299,6 +299,21 @@ class Preventive
     return $stmt->execute($data);
   }
 
+  public function checklist_check($data)
+  {
+    $sql = "SELECT c.id
+    FROM factory.asset_type a
+    LEFT JOIN factory.asset_checklist b
+    ON a.checklist = b.id
+    LEFT JOIN factory.asset_checklist c
+    ON b.id = c.reference_id
+    WHERE a.id = ?";
+    $stmt = $this->dbcon->prepare($sql);
+    $stmt->execute($data);
+    $row = $stmt->fetch();
+    return (!empty($row['id']) ? $row['id'] : "");
+  }
+
   public function checklist_count($data)
   {
     $sql = "SELECT COUNT(*) 
@@ -331,10 +346,10 @@ class Preventive
 
   public function asset_worker($data)
   {
-    $sql = "SELECT b.id,CONCAT(b.firstname,' ',b.lastname) username
+    $sql = "SELECT b.Emp_ID id,CONCAT('คุณ',b.Emp_Name,' ',b.Emp_Surname) username
     FROM factory.asset_type a
-    LEFT JOIN factory.user b
-    ON FIND_IN_SET(b.id, a.worker)
+    LEFT JOIN demo_erp_new.employee_detail b
+    ON FIND_IN_SET(b.Emp_ID, a.worker)
     WHERE a.id = ?";
     $stmt = $this->dbcon->prepare($sql);
     $stmt->execute($data);
@@ -420,8 +435,8 @@ class Preventive
     $sql = "SELECT a.id,a.uuid,a.text,d.name type_name,
     CONCAT('PM',YEAR(a.`start`),LPAD(a.`last`,4,'0')) ticket,
     (SELECT COUNT(*) FROM factory.preventive_request_item x WHERE x.request_id = a.id) amount,
-    CONCAT(b.firstname,' ',b.lastname) username,
-    GROUP_CONCAT(c.firstname,' ',c.lastname) worker,
+    CONCAT('คุณ',b.Emp_Name,' ',b.Emp_Surname) username,
+    GROUP_CONCAT('คุณ',c.Emp_Name,' ',c.Emp_Surname) worker,
     CONCAT(DATE_FORMAT(a.`start`,'%d/%m/%Y'),',',DATE_FORMAT(a.`end`,'%d/%m/%Y')) appointment,
     (
       CASE
@@ -453,10 +468,10 @@ class Preventive
     ) status_page,
     DATE_FORMAT(a.created,'%d/%m/%Y, %H:%i น.') created
     FROM factory.preventive_request a
-    LEFT JOIN factory.user b
-    ON a.user_id = b.id
-    LEFT JOIN factory.user c
-    ON FIND_IN_SET(c.id, a.worker)
+    LEFT JOIN demo_erp_new.employee_detail b
+    ON a.user_id = b.Emp_ID
+    LEFT JOIN demo_erp_new.employee_detail c
+    ON FIND_IN_SET(c.Emp_ID, a.worker)
     LEFT JOIN factory.asset_type d
     ON a.type_id = d.id
     WHERE a.user_id = '{$user}' ";
@@ -464,6 +479,8 @@ class Preventive
     if (!empty($keyword)) {
       $sql .= " AND (CONCAT('PM',YEAR(a.created),LPAD(a.`last`,4,0)) LIKE '%{$keyword}%' OR DATE_FORMAT(a.`start`, '%d/%m/%Y') LIKE '%{$keyword}%' OR DATE_FORMAT(a.`end`, '%d/%m/%Y') LIKE '%{$keyword}%' OR b.name LIKE '%{$keyword}%' OR a.text LIKE '%{$keyword}%' OR DATE_FORMAT(a.created, '%d/%m/%Y') LIKE '%{$keyword}%') ";
     }
+
+    $sql .= " GROUP BY a.id ";
 
     if ($filter_order) {
       $sql .= " ORDER BY {$column[$order_column]} {$order_dir} ";
@@ -530,8 +547,8 @@ class Preventive
     $sql = "SELECT a.id,a.uuid,a.text,d.name type_name,
     CONCAT('PM',YEAR(a.`start`),LPAD(a.`last`,4,'0')) ticket,
     (SELECT COUNT(*) FROM factory.preventive_request_item x WHERE x.request_id = a.id) amount,
-    CONCAT(b.firstname,' ',b.lastname) username,
-    GROUP_CONCAT(c.firstname,' ',c.lastname) worker,
+    CONCAT('คุณ',b.Emp_Name,' ',b.Emp_Surname) username,
+    GROUP_CONCAT('คุณ',c.Emp_Name,' ',c.Emp_Surname) worker,
     CONCAT(DATE_FORMAT(a.`start`,'%d/%m/%Y'),',',DATE_FORMAT(a.`end`,'%d/%m/%Y')) appointment,
     (
       CASE
@@ -564,10 +581,10 @@ class Preventive
     ) status_page,
     DATE_FORMAT(a.created,'%d/%m/%Y, %H:%i น.') created
     FROM factory.preventive_request a
-    LEFT JOIN factory.user b
-    ON a.user_id = b.id
-    LEFT JOIN factory.user c
-    ON FIND_IN_SET(c.id, a.worker)
+    LEFT JOIN demo_erp_new.employee_detail b
+    ON a.user_id = b.Emp_ID
+    LEFT JOIN demo_erp_new.employee_detail c
+    ON FIND_IN_SET(c.Emp_ID, a.worker)
     LEFT JOIN factory.asset_type d
     ON a.type_id = d.id
     WHERE a.status IN (1,3) ";
@@ -575,6 +592,8 @@ class Preventive
     if (!empty($keyword)) {
       $sql .= " AND (CONCAT('PM',YEAR(a.created),LPAD(a.`last`,4,0)) LIKE '%{$keyword}%' OR DATE_FORMAT(a.`start`, '%d/%m/%Y') LIKE '%{$keyword}%' OR DATE_FORMAT(a.`end`, '%d/%m/%Y') LIKE '%{$keyword}%' OR b.name LIKE '%{$keyword}%' OR a.text LIKE '%{$keyword}%' OR DATE_FORMAT(a.created, '%d/%m/%Y') LIKE '%{$keyword}%') ";
     }
+
+    $sql .= " GROUP BY a.id ";
 
     if ($filter_order) {
       $sql .= " ORDER BY {$column[$order_column]} {$order_dir} ";
@@ -641,8 +660,8 @@ class Preventive
     $sql = "SELECT a.id,a.uuid,a.text,d.name type_name,
     CONCAT('PM',YEAR(a.`start`),LPAD(a.`last`,4,'0')) ticket,
     (SELECT COUNT(*) FROM factory.preventive_request_item x WHERE x.request_id = a.id) amount,
-    CONCAT(b.firstname,' ',b.lastname) username,
-    GROUP_CONCAT(c.firstname,' ',c.lastname) worker,
+    CONCAT('คุณ',b.Emp_Name,' ',b.Emp_Surname) username,
+    GROUP_CONCAT('คุณ',c.Emp_Name,' ',c.Emp_Surname) worker,
     CONCAT(DATE_FORMAT(a.`start`,'%d/%m/%Y'),',',DATE_FORMAT(a.`end`,'%d/%m/%Y')) appointment,
     (
       CASE
@@ -668,10 +687,10 @@ class Preventive
     ) status_color,
     DATE_FORMAT(a.created,'%d/%m/%Y, %H:%i น.') created
     FROM factory.preventive_request a
-    LEFT JOIN factory.user b
-    ON a.user_id = b.id
-    LEFT JOIN factory.user c
-    ON FIND_IN_SET(c.id, a.worker)
+    LEFT JOIN demo_erp_new.employee_detail b
+    ON a.user_id = b.Emp_ID
+    LEFT JOIN demo_erp_new.employee_detail c
+    ON FIND_IN_SET(c.Emp_ID, a.worker)
     LEFT JOIN factory.asset_type d
     ON a.type_id = d.id
     WHERE FIND_IN_SET({$user}, a.worker) ";
@@ -679,6 +698,8 @@ class Preventive
     if (!empty($keyword)) {
       $sql .= " AND (CONCAT('PM',YEAR(a.created),LPAD(a.`last`,4,0)) LIKE '%{$keyword}%' OR DATE_FORMAT(a.`start`, '%d/%m/%Y') LIKE '%{$keyword}%' OR DATE_FORMAT(a.`end`, '%d/%m/%Y') LIKE '%{$keyword}%' OR b.name LIKE '%{$keyword}%' OR a.text LIKE '%{$keyword}%' OR DATE_FORMAT(a.created, '%d/%m/%Y') LIKE '%{$keyword}%') ";
     }
+
+    $sql .= " GROUP BY a.id ";
 
     if ($filter_order) {
       $sql .= " ORDER BY {$column[$order_column]} {$order_dir} ";
@@ -745,8 +766,8 @@ class Preventive
     $sql = "SELECT a.id,a.uuid,a.text,d.name type_name,
     CONCAT('PM',YEAR(a.`start`),LPAD(a.`last`,4,'0')) ticket,
     (SELECT COUNT(*) FROM factory.preventive_request_item x WHERE x.request_id = a.id) amount,
-    CONCAT(b.firstname,' ',b.lastname) username,
-    GROUP_CONCAT(c.firstname,' ',c.lastname) worker,
+    CONCAT('คุณ',b.Emp_Name,' ',b.Emp_Surname) username,
+    GROUP_CONCAT('คุณ',c.Emp_Name,' ',c.Emp_Surname) worker,
     CONCAT(DATE_FORMAT(a.`start`,'%d/%m/%Y'),',',DATE_FORMAT(a.`end`,'%d/%m/%Y')) appointment,
     (
       CASE
@@ -772,10 +793,10 @@ class Preventive
     ) status_color,
     DATE_FORMAT(a.created,'%d/%m/%Y, %H:%i น.') created
     FROM factory.preventive_request a
-    LEFT JOIN factory.user b
-    ON a.user_id = b.id
-    LEFT JOIN factory.user c
-    ON FIND_IN_SET(c.id, a.worker)
+    LEFT JOIN demo_erp_new.employee_detail b
+    ON a.user_id = b.Emp_ID
+    LEFT JOIN demo_erp_new.employee_detail c
+    ON FIND_IN_SET(c.Emp_ID, a.worker)
     LEFT JOIN factory.asset_type d
     ON a.type_id = d.id
     WHERE a.id != '' ";
@@ -783,6 +804,8 @@ class Preventive
     if (!empty($keyword)) {
       $sql .= " AND (CONCAT('PM',YEAR(a.created),LPAD(a.`last`,4,0)) LIKE '%{$keyword}%' OR DATE_FORMAT(a.`start`, '%d/%m/%Y') LIKE '%{$keyword}%' OR DATE_FORMAT(a.`end`, '%d/%m/%Y') LIKE '%{$keyword}%' OR b.name LIKE '%{$keyword}%' OR a.text LIKE '%{$keyword}%' OR DATE_FORMAT(a.created, '%d/%m/%Y') LIKE '%{$keyword}%') ";
     }
+
+    $sql .= " GROUP BY a.id ";
 
     if ($filter_order) {
       $sql .= " ORDER BY {$column[$order_column]} {$order_dir} ";

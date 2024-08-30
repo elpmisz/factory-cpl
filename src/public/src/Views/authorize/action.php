@@ -18,10 +18,16 @@ $param2 = (isset($param[2]) ? $param[2] : "");
 
 if ($action === "update") {
   try {
-    $uuid = (isset($_POST['uuid']) ? $VALIDATION->input($_POST['uuid']) : "");
-    $auth = implode(',', $_POST['auth']);
+    $user_id = (isset($_POST['user_id']) ? $VALIDATION->input($_POST['user_id']) : "");
+    $service = implode(',', $_POST['service']);
 
-    $USER->auth_update([$auth, $uuid]);
+    $count = $USER->auth_count([$user_id]);
+    if (intval($count) === 0) {
+      $USER->auth_add([$user_id, $service]);
+    } else {
+      $USER->auth_update([$service, $user_id]);
+    }
+
     $VALIDATION->alert("success", "ดำเนินการเรียบร้อย!", "/auth");
   } catch (PDOException $e) {
     die($e->getMessage());

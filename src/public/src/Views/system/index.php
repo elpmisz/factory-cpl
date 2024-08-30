@@ -58,7 +58,7 @@ $default = (isset($system['password_default']) ? $system['password_default'] : "
               </div>
             </div>
           </div>
-          <div class="row mb-2">
+          <div class="row mb-2" style="display: none;">
             <label class="col-xl-2 offset-xl-2 col-form-label">รหัสผ่าน (เริ่มต้น)</label>
             <div class="col-xl-4">
               <input type="password" class="form-control form-control-sm" name="default" value="<?php echo $default ?>" required>

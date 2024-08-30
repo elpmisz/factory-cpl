@@ -43,9 +43,9 @@ $system_name = (isset($system['name']) ? $system['name'] : "FACTORY");
               <div class="row mb-2 mx-3">
                 <div class="input-group">
                   <div class="input-group-prepend">
-                    <div class="input-group-text"><i class="fa fa-envelope"></i></div>
+                    <div class="input-group-text"><i class="fa fa-user"></i></div>
                   </div>
-                  <input type="email" class="form-control" name="email" placeholder="อีเมล" required>
+                  <input type="text" class="form-control" name="username" placeholder="ชื่อผู้ใช้ระบบ" required>
                   <div class="invalid-feedback">
                     กรุณากรอกข้อมูล!
                   </div>

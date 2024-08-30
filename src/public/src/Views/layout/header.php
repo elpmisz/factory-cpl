@@ -19,7 +19,7 @@ try {
     die(header("Location: /"));
   }
   $decode = JWT::decode($jwt, new Key(JWT_SECRET, JWT_ALGO));
-  $email = (isset($decode->data) ? $decode->data : "");
+  $username = (isset($decode->data) ? $decode->data : "");
 } catch (Exception $e) {
   $msg = $e->getMessage();
   if ($msg === "Expired token") {
@@ -31,16 +31,18 @@ $USER = new User();
 $SYSTEM = new System();
 $SERVICE = new Service();
 $system = $SYSTEM->system_read();
-$user_count = $USER->user_count([$email]);
+$user_count = $USER->user_count([$username]);
 if ($user_count === 0) {
   die(header("Location: /logout"));
 }
-$user = $USER->user_view($email);
+$user = $USER->user_view([$username]);
 $system_name = (isset($system['name']) ? $system['name'] : "");
-$firstname = (!empty($user['firstname']) ? ucfirst($user['firstname']) : "");
+$firstname = (!empty($user['firstname']) ? $user['firstname'] : "");
+$fullname = (!empty($user['fullname']) ? $user['fullname'] : "");
+$user_id = (!empty($user['user_id']) ? $user['user_id'] : "");
 
 $services = $SERVICE->service_read();
-$user_auth = explode(",", $user['auth']);
+$user_auth = explode(",", $user['service']);
 ?>
 <!DOCTYPE html>
 <html lang="en">

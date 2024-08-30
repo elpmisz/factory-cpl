@@ -12,6 +12,7 @@ $row = $PREVENTIVE->preventive_view([$uuid]);
 $worker = $PREVENTIVE->worker_view([$uuid]);
 $machine = $PREVENTIVE->machine_view([$uuid]);
 $processes = $PREVENTIVE->process_view([$uuid]);
+$checklist_count = $PREVENTIVE->checklist_check([$row['type_id']]);
 ?>
 
 <div class="row">
@@ -142,9 +143,13 @@ $processes = $PREVENTIVE->process_view([$uuid]);
                               <?php endif; ?>
                             </td>
                             <td class="text-center">
-                              <a href="javascript:void(0)" class="badge badge-primary font-weight-light checklist-form" id="<?php echo $mc['id'] ?>">
-                                รายการตรวจสอบ
-                              </a>
+                              <?php if (!empty($checklist_count)) : ?>
+                                <a href="javascript:void(0)" class="badge badge-primary font-weight-light checklist-form" id="<?php echo $mc['id'] ?>">
+                                  รายการตรวจสอบ
+                                </a>
+                              <?php else : ?>
+                                -
+                              <?php endif; ?>
                             </td>
                           </tr>
                       <?php

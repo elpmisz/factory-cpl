@@ -181,52 +181,17 @@ $processes = $HELPDESK->process_view([$uuid]);
               </div>
 
               <hr>
-              <div class="h5 text-primary">รายละเอียดการดำเนินการ</div>
-              <div class="row mb-2">
-                <div class="table-responsive">
-                  <table class="table table-sm table-bordered table-hover">
-                    <thead>
-                      <tr>
-                        <th width="10%">#</th>
-                        <th width="10%">รับเรื่อง</th>
-                        <th width="10%">กำหนดเสร็จ</th>
-                        <th width="40%">การดำเนินการ</th>
-                        <th width="20%">ผู้ดำเนินการ</th>
-                        <th width="10%">เอกสารแนบ</th>
-                      </tr>
-                    </thead>
-                    <?php
-                    foreach ($processes as $process) :
-                    ?>
-                      <tr>
-                        <td class="text-center">
-                          <span class="badge badge-<?php echo $process['status_color'] ?> font-weight-light">
-                            <?php echo $process['status_name'] ?>
-                          </span>
-                        </td>
-                        <td class="text-center"><?php echo $process['start'] ?></td>
-                        <td class="text-center"><?php echo $process['end'] ?></td>
-                        <td><?php echo str_replace("\r\n", "<br>", $process['text']) ?></td>
-                        <td class="text-center"><?php echo $process['worker'] ?></td>
-                        <td class="text-center">
-                          <?php if (!empty($process['file'])) : ?>
-                            <a href="/src/Publics/helpdesk/<?php echo $process['file'] ?>" class="text-primary" target="_blank">
-                              <span class="badge badge-primary font-weight-light">ดาวน์โหลด!</span>
-                            </a>
-                          <?php endif; ?>
-                        </td>
-                      </tr>
-                    <?php endforeach; ?>
-                  </table>
-                </div>
-              </div>
-
-              <hr>
               <div class="h5 text-danger">กรุณาเลือกผู้รับผิดชอบ</div>
               <div class="row mb-2">
                 <label class="col-xl-2 col-form-label">ผู้รับผิดชอบ</label>
                 <div class="col-xl-4">
-                  <select class="form-control form-control-sm user-select" name="user" required></select>
+                  <select class="form-control form-control-sm user-select" name="user" required>
+                    <?php
+                    if (!empty($user['user_id'])) {
+                      echo "<option value='{$user['user_id']}'>{$user['fullname']}</option>";
+                    }
+                    ?>
+                  </select>
                   <div class="invalid-feedback">
                     กรุณากรอกข้อมูล!
                   </div>

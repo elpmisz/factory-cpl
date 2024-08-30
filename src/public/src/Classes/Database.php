@@ -9,9 +9,9 @@ class Database
 {
   private $dbCon = null;
   private $dbStmt = null;
-  private $dbHost = "database";
+  private $dbHost = "localhost";
   private $dbUser = "root";
-  private $dbPass = "P@ssw0rd#db";
+  private $dbPass = "Admin@cpl2017";
   private $dbName = "factory";
   private $dbChar = "utf8";
   private $dbOptions = [

@@ -50,17 +50,18 @@ $param2 = (isset($param[2]) ? $param[2] : "");
 
 if ($action === "login") {
   try {
-    $email = (isset($_POST['email']) ? $VALIDATION->input($_POST['email']) : "");
+    $username = (isset($_POST['username']) ? $VALIDATION->input($_POST['username']) : "");
     $password = (isset($_POST['password']) ? $VALIDATION->input($_POST['password']) : "");
+    $password = (!empty($password) ? sha1(md5($password)) : "");
 
-    $count = $USER->user_count([$email]);
-    $user = $USER->user_view($email);
+    $count = $USER->user_count([$username]);
+    $user = $USER->user_view([$username]);
 
-    if (intval($count) === 0 || intval(password_verify($password, $user['password'])) === 0) {
+    if (intval($count) === 0 || ($password !== $user['P5ssword'])) {
       $VALIDATION->alert("danger", "อีเมล หรือรหัสผ่านไม่ถูกต้อง!", "/");
     }
 
-    $status = $USER->user_status([$email]);
+    $status = $USER->user_status([$username]);
     if (intval($status) === 2) {
       $VALIDATION->alert("danger", "กรุณาติดต่อผู้ดูแลระบบ!", "/");
     }
@@ -69,7 +70,7 @@ if ($action === "login") {
     $payload = [
       "iat" => $now,
       "exp" => $now + (12 * (60 * 60)),
-      "data" => $email,
+      "data" => $username,
     ];
     $encode = JWT::encode($payload, JWT_SECRET, JWT_ALGO);
     setcookie("jwt", $encode);

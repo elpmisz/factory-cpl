@@ -82,7 +82,7 @@
       <ul class="navbar-nav ml-auto d-none d-xl-block">
         <li class="nav-item dropdown">
           <a class="nav-link" href="javascript:void(0)" data-toggle="dropdown">
-            <span class="font-weight-bold"><?php echo $firstname ?></span>
+            <span class="font-weight-bold"><?php echo $fullname ?></span>
             <i class="fas fa-caret-down pl-3"></i>
           </a>
           <div class="dropdown-menu dropdown-menu-right">

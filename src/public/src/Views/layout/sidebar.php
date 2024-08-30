@@ -80,6 +80,12 @@ $setting_auth = ($page === "setting-auth" ? 'class="active"' : "");
         บริการ
       </a>
       <ul class="collapse list-unstyled <?php echo $service_menu ?>" id="service-menu">
+        <li>
+          <a href="https://rtls.lailab.online" target="_blank">
+            <i class="fa fa-bars pr-2"></i>
+            ระบบติดตามวัตถุดิบผลิต
+          </a>
+        </li>
         <?php foreach ($services as $key => $service) : ?>
           <?php
           $auth_check = (isset($user_auth[$key]) ? intval($user_auth[$key]) : "");
@@ -95,7 +101,7 @@ $setting_auth = ($page === "setting-auth" ? 'class="active"' : "");
         <?php endforeach; ?>
       </ul>
     </li>
-    <?php if (intval($user['level']) === 9) : ?>
+    <?php if (in_array(intval($user['department']), [45, 88])) : ?>
       <li>
         <a href="#setting-menu" data-toggle="collapse" class="dropdown-toggle">ตั้งค่าระบบ</a>
         <ul class="collapse list-unstyled <?php echo $setting_menu ?>" id="setting-menu">
@@ -109,12 +115,6 @@ $setting_auth = ($page === "setting-auth" ? 'class="active"' : "");
             <a href="/line-token">
               <i class="fa fa-gear pr-2"></i>
               LINE Token
-            </a>
-          </li>
-          <li <?php echo $setting_user ?>>
-            <a href="/user">
-              <i class="fa fa-gear pr-2"></i>
-              ผู้ใช้งาน
             </a>
           </li>
           <li <?php echo $setting_service ?>>

@@ -19,7 +19,7 @@ include_once(__DIR__ . "/../layout/header.php");
               <div class="row mb-2">
                 <label class="col-xl-2 offset-xl-2 col-form-label">รายชื่อ</label>
                 <div class="col-xl-4">
-                  <select class="form-control form-control-sm user-select" name="user" required></select>
+                  <select class="form-control form-control-sm user-select" name="user_id" required></select>
                   <div class="invalid-feedback">
                     กรุณากรอกข้อมูล!
                   </div>
@@ -33,12 +33,6 @@ include_once(__DIR__ . "/../layout/header.php");
                       <label class="form-check-label px-3">
                         <input class="form-check-input" type="radio" name="type" value="1" required>
                         <span class="text-success">ผู้อนุมัติ / ผู้ตรวจสอบ</span>
-                      </label>
-                    </div>
-                    <div class="col-xl-3">
-                      <label class="form-check-label px-3">
-                        <input class="form-check-input" type="radio" name="type" value="2" required>
-                        <span class="text-primary">ผู้จัดการระบบ</span>
                       </label>
                     </div>
                   </div>

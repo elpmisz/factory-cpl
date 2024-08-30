@@ -18,15 +18,15 @@ $param2 = (isset($param[2]) ? $param[2] : "");
 
 if ($action === "create") {
   try {
-    $user = (isset($_POST['user']) ? $VALIDATION->input($_POST['user']) : "");
+    $user_id = (isset($_POST['user_id']) ? $VALIDATION->input($_POST['user_id']) : "");
     $type = (isset($_POST['type']) ? $VALIDATION->input($_POST['type']) : "");
 
-    $count = $AUTHORIZE->authorize_count([$user, $type]);
+    $count = $AUTHORIZE->authorize_count([$user_id, $type]);
     if (intval($count) > 0) {
       $VALIDATION->alert("danger", "ข้อมูลซ้ำในระบบ!", "/preventive/authorize");
     }
 
-    $AUTHORIZE->authorize_create([$user, $type]);
+    $AUTHORIZE->authorize_create([$user_id, $type]);
     $VALIDATION->alert("success", "ดำเนินการเรียบร้อย!", "/preventive/authorize");
   } catch (PDOException $e) {
     die($e->getMessage());
@@ -54,16 +54,6 @@ if ($action === "delete") {
 if ($action === "data") {
   try {
     $result = $AUTHORIZE->authorize_data();
-    echo json_encode($result);
-  } catch (PDOException $e) {
-    die($e->getMessage());
-  }
-}
-
-if ($action === "user-select") {
-  try {
-    $keyword = (isset($_POST['q']) ? $VALIDATION->input($_POST['q']) : "");
-    $result = $AUTHORIZE->user_select($keyword);
     echo json_encode($result);
   } catch (PDOException $e) {
     die($e->getMessage());

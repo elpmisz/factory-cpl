@@ -6,9 +6,8 @@ include_once(__DIR__ . "/../layout/header.php");
 use App\Classes\Helpdesk;
 
 $HELPDESK = new Helpdesk();
-$approver = $HELPDESK->helpdesk_authorize($user['user_id'], 1);
-$worker = $HELPDESK->helpdesk_authorize($user['user_id'], 2);
-$worker_authorize = $HELPDESK->worker_authorize([$user['user_id']]);
+$approve_authorize = $HELPDESK->helpdesk_authorize([$user_id, 1]);
+$worker_authorize = $HELPDESK->worker_authorize([$user_id]);
 $count = $HELPDESK->helpdesk_card();
 ?>
 
@@ -21,7 +20,7 @@ $count = $HELPDESK->helpdesk_card();
       <div class="card-body">
 
         <div class="row justify-content-end mb-2">
-          <?php if (intval($worker) > 0 || intval($approver) > 0) : ?>
+          <?php if (in_array(intval($user['department']), [45, 88])) : ?>
             <div class="col-xl-3 mb-2">
               <a href="/helpdesk/manage" class="btn btn-sm btn-info btn-block">
                 <i class="fa fa-file-lines pr-2"></i>จัดการระบบ
@@ -40,7 +39,7 @@ $count = $HELPDESK->helpdesk_card();
   </div>
 </div>
 
-<?php if (intval($approver) > 0 && intval($count['helpdesk_approve']) > 0) : ?>
+<?php if (intval($approve_authorize) > 0 && intval($count['helpdesk_approve']) > 0) : ?>
   <div class="row mb-2">
     <div class="col-xl-12">
       <div class="card shadow">
@@ -70,7 +69,7 @@ $count = $HELPDESK->helpdesk_card();
   </div>
 <?php endif; ?>
 
-<?php if (intval($worker) > 0 && intval($count['helpdesk_assign']) > 0) : ?>
+<?php if (in_array(intval($user['department']), [88])  && intval($count['helpdesk_assign']) > 0) : ?>
   <div class="row mb-2">
     <div class="col-xl-12">
       <div class="card shadow">
@@ -100,7 +99,7 @@ $count = $HELPDESK->helpdesk_card();
   </div>
 <?php endif; ?>
 
-<?php if (intval($worker) > 0 || intval($worker_authorize) > 0) : ?>
+<?php if (intval($worker_authorize) > 0  && intval($count['helpdesk_work']) > 0) : ?>
   <div class="row mb-2">
     <div class="col-xl-12">
       <div class="card shadow">

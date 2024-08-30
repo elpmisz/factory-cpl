@@ -27,14 +27,14 @@ class Helpdesk
     return $stmt->fetch();
   }
 
-  public function helpdesk_authorize($user, $type)
+  public function helpdesk_authorize($data)
   {
     $sql = "SELECT COUNT(*) 
     FROM factory.helpdesk_authorize 
-    WHERE user = '{$user}'
-    AND type = '{$type}' ";
+    WHERE user_id = ?
+    AND type = ?";
     $stmt = $this->dbcon->prepare($sql);
-    $stmt->execute();
+    $stmt->execute($data);
     return $stmt->fetchColumn();
   }
 
@@ -115,7 +115,7 @@ class Helpdesk
   public function helpdesk_view($data)
   {
     $sql = "SELECT a.*,CONCAT('HD',YEAR(a.created),LPAD(a.`last`,4,'0')) ticket,
-    CONCAT(b.firstname,' ',b.lastname) username,c.`name` service_name,
+    CONCAT('คุณ',b.Emp_Name,' ',b.Emp_Surname) username,c.`name` service_name,c.asset,
     CONCAT('[',d.code,'] ',d.`name`) asset_name,d.asset_code asset_assetcode,d.`code` asset_code,
     e.`name` asset_department,f.`name` asset_location,g.`name` asset_brand,h.`name` asset_model,
     (
@@ -155,8 +155,8 @@ class Helpdesk
     ) status_color,
     DATE_FORMAT(a.created,'%d/%m/%Y, %H:%i น.') created
     FROM factory.helpdesk_request a
-    LEFT JOIN factory.user b
-    ON a.user_id = b.id
+    LEFT JOIN demo_erp_new.employee_detail b
+    ON a.user_id = b.Emp_ID
     LEFT JOIN factory.helpdesk_service c
     ON a.service_id = c.id 
     LEFT JOIN factory.asset d
@@ -175,12 +175,32 @@ class Helpdesk
     return $stmt->fetch();
   }
 
-  public function helpdesk_update($data)
+  public function helpdesk_view_update($data)
   {
     $sql = "UPDATE factory.helpdesk_request SET
     asset_id = ?,
     contact = ?,
     text = ?,
+    updated = NOW()
+    WHERE uuid = ?";
+    $stmt = $this->dbcon->prepare($sql);
+    return $stmt->execute($data);
+  }
+
+  public function helpdesk_work_update($data)
+  {
+    $sql = "UPDATE factory.helpdesk_request SET
+    oil = ?,
+    cable = ?,
+    tool = ?,
+    work = ?,
+    fix = ?,
+    `what` = ?,
+    `why` = ?,
+    `when` = ?,
+    pay = ?,
+    pr = ?,
+    status = ?,
     updated = NOW()
     WHERE uuid = ?";
     $stmt = $this->dbcon->prepare($sql);
@@ -206,7 +226,7 @@ class Helpdesk
   public function process_view($data)
   {
     $sql = "SELECT DATE_FORMAT(b.created,'%d/%m/%Y') `start`,DATE_FORMAT(b.`end`,'%d/%m/%Y') `end`,
-    b.text,CONCAT(c.firstname,' ',c.lastname) worker,b.`file`,b.cost,
+    b.text,CONCAT('คุณ',c.Emp_Name,' ',c.Emp_Surname) worker,b.`file`,b.cost,
     (
       CASE
         WHEN b.status = 1 THEN 'รออนุมัติ'
@@ -239,10 +259,10 @@ class Helpdesk
     FROM factory.helpdesk_request a
     LEFT JOIN factory.helpdesk_request_process b
     ON a.id = b.request_id
-    LEFT JOIN factory.user c
-    ON b.user_id = c.id
+    LEFT JOIN demo_erp_new.employee_detail c
+    ON b.user_id = c.Emp_ID
     WHERE a.uuid = ?
-    ORDER BY b.id DESC";
+    ORDER BY b.created DESC";
     $stmt = $this->dbcon->prepare($sql);
     $stmt->execute($data);
     return $stmt->fetchAll();
@@ -479,12 +499,12 @@ class Helpdesk
 
     $sql = "SELECT a.uuid,CONCAT('HD',YEAR(a.created),LPAD(a.`last`,4,'0')) ticket,
     b.`name` service_name,a.text,
-    CONCAT(c.firstname,' ',c.lastname) username,
+    CONCAT('คุณ',c.Emp_Name,' ',c.Emp_Surname) username,
     (
-      SELECT CONCAT(y.firstname,' ',y.lastname)
+      SELECT CONCAT('คุณ',y.Emp_Name,' ',y.Emp_Surname)
       FROM factory.helpdesk_request_process x
-      LEFT JOIN factory.user y
-      ON x.user_id = y.id
+      LEFT JOIN demo_erp_new.employee_detail y
+      ON x.user_id = y.Emp_ID
       WHERE x.status IN (3,4,5,7) 
       AND x.request_id = a.id
       ORDER BY x.status DESC LIMIT 1
@@ -526,7 +546,8 @@ class Helpdesk
     ) status_color,
     (
       CASE
-        WHEN a.status = 1 THEN 'view'
+        WHEN a.status = 1 AND b.approve = 1 THEN 'view'
+        WHEN a.status = 2 AND b.approve = 2 THEN 'view'
         ELSE 'complete'
       END
     ) status_page,
@@ -534,8 +555,8 @@ class Helpdesk
     FROM factory.helpdesk_request a
     LEFT JOIN factory.helpdesk_service b
     ON a.service_id = b.id
-    LEFT JOIN factory.user c
-    ON a.user_id = c.id
+    LEFT JOIN demo_erp_new.employee_detail c
+    ON a.user_id = c.Emp_ID
     LEFT JOIN factory.asset d
     ON a.asset_id = d.id
     WHERE a.id != '' ";
@@ -607,7 +628,7 @@ class Helpdesk
 
     $sql = "SELECT a.uuid,CONCAT('HD',YEAR(a.created),LPAD(a.`last`,4,'0')) ticket,
     b.`name` service_name,a.text,
-    CONCAT(c.firstname,' ',c.lastname) username,
+    CONCAT('คุณ',c.Emp_Name,' ',c.Emp_Surname) username,
     (
       CASE
         WHEN a.status = 1 THEN 'รออนุมัติ'
@@ -647,8 +668,8 @@ class Helpdesk
     FROM factory.helpdesk_request a
     LEFT JOIN factory.helpdesk_service b
     ON a.service_id = b.id
-    LEFT JOIN factory.user c
-    ON a.user_id = c.id
+    LEFT JOIN demo_erp_new.employee_detail c
+    ON a.user_id = c.Emp_ID
     LEFT JOIN factory.asset d
     ON a.asset_id = d.id
     WHERE a.status IN (1,7) ";
@@ -717,7 +738,7 @@ class Helpdesk
 
     $sql = "SELECT a.uuid,CONCAT('HD',YEAR(a.created),LPAD(a.`last`,4,'0')) ticket,
     b.`name` service_name,a.text,
-    CONCAT(c.firstname,' ',c.lastname) username,
+    CONCAT('คุณ',c.Emp_Name,' ',c.Emp_Surname) username,
     (
       CASE
         WHEN a.status = 1 THEN 'รออนุมัติ'
@@ -750,8 +771,8 @@ class Helpdesk
     FROM factory.helpdesk_request a
     LEFT JOIN factory.helpdesk_service b
     ON a.service_id = b.id
-    LEFT JOIN factory.user c
-    ON a.user_id = c.id
+    LEFT JOIN demo_erp_new.employee_detail c
+    ON a.user_id = c.Emp_ID
     LEFT JOIN factory.asset d
     ON a.asset_id = d.id
     WHERE a.status = 2 ";
@@ -820,12 +841,12 @@ class Helpdesk
 
     $sql = "SELECT a.uuid,CONCAT('HD',YEAR(a.created),LPAD(a.`last`,4,'0')) ticket,
     b.`name` service_name,a.text,
-    CONCAT(c.firstname,' ',c.lastname) username,
+    CONCAT('คุณ',c.Emp_Name,' ',c.Emp_Surname) username,
     (
-      SELECT CONCAT(y.firstname,' ',y.lastname)
+      SELECT CONCAT('คุณ',y.Emp_Name,' ',y.Emp_Surname)
       FROM factory.helpdesk_request_process x
-      LEFT JOIN factory.user y
-      ON x.user_id = y.id
+      LEFT JOIN demo_erp_new.employee_detail y
+      ON x.user_id = y.Emp_ID
       WHERE x.status IN (3,4,5,7) 
       AND x.request_id = a.id
       ORDER BY x.status DESC LIMIT 1
@@ -869,8 +890,8 @@ class Helpdesk
     FROM factory.helpdesk_request a
     LEFT JOIN factory.helpdesk_service b
     ON a.service_id = b.id
-    LEFT JOIN factory.user c
-    ON a.user_id = c.id
+    LEFT JOIN demo_erp_new.employee_detail c
+    ON a.user_id = c.Emp_ID
     LEFT JOIN factory.asset d
     ON a.asset_id = d.id
     WHERE a.status IN (3,4,5,6) ";
@@ -948,12 +969,12 @@ class Helpdesk
 
     $sql = "SELECT a.uuid,CONCAT('HD',YEAR(a.created),LPAD(a.`last`,4,'0')) ticket,
     b.`name` service_name,a.text,
-    CONCAT(c.firstname,' ',c.lastname) username,
+    CONCAT('คุณ',c.Emp_Name,' ',c.Emp_Surname) username,
     (
-      SELECT CONCAT(y.firstname,' ',y.lastname)
+      SELECT CONCAT('คุณ',y.Emp_Name,' ',y.Emp_Surname)
       FROM factory.helpdesk_request_process x
-      LEFT JOIN factory.user y
-      ON x.user_id = y.id
+      LEFT JOIN demo_erp_new.employee_detail y
+      ON x.user_id = y.Emp_ID
       WHERE x.status IN (3,4,5,7) 
       AND x.request_id = a.id
       ORDER BY x.status DESC LIMIT 1
@@ -997,8 +1018,8 @@ class Helpdesk
     FROM factory.helpdesk_request a
     LEFT JOIN factory.helpdesk_service b
     ON a.service_id = b.id
-    LEFT JOIN factory.user c
-    ON a.user_id = c.id
+    LEFT JOIN demo_erp_new.employee_detail c
+    ON a.user_id = c.Emp_ID
     LEFT JOIN factory.asset d
     ON a.asset_id = d.id
     WHERE a.id != '' ";
@@ -1078,12 +1099,31 @@ class Helpdesk
 
   public function spare_select($keyword)
   {
-    $sql = "SELECT a.`code` id,CONCAT('[',a.`code`,'] ',a.`name`) `text`
-    FROM factory.spare_item a ";
+    global $dbmysql;
+    $sql = "SELECT a.code `id`,CONCAT('[',a.code,'] ',a.name) `text`
+    FROM raw_material.items a
+    LEFT JOIN raw_material.item_group b 
+    ON LEFT(a.code,2) = b.item
+    AND a.warehouse = b.warehouse
+    WHERE b.checked = 1 ";
     if (!empty($keyword)) {
-      $sql .= " WHERE (a.code LIKE '%{$keyword}%' OR a.name LIKE '%{$keyword}%' OR a.searchcode LIKE '%{$keyword}%') ";
+      $sql .= " AND (a.code LIKE '%{$keyword}%' OR a.name LIKE '%{$keyword}%' ) ";
     }
-    $sql .= " ORDER BY a.code ASC LIMIT 50";
+    $sql .= " LIMIT 50 ";
+    $stmt = $dbmysql->prepare($sql);
+    $stmt->execute();
+    return $stmt->fetchAll();
+  }
+
+  public function pay_select($keyword)
+  {
+    $sql = "SELECT a.run_no id,a.run_no `text`
+    FROM raw_material.issue_slip a
+    WHERE a.`status` = 2 ";
+    if (!empty($keyword)) {
+      $sql .= " AND (a.run_no LIKE '%{$keyword}%' OR a.objective LIKE '%{$keyword}%' OR a.item_remark LIKE '%{$keyword}%') ";
+    }
+    $sql .= " GROUP BY a.run_no ORDER BY a.run_no DESC LIMIT 50";
     $stmt = $this->dbcon->prepare($sql);
     $stmt->execute();
     return $stmt->fetchAll();

@@ -17,7 +17,7 @@ class PreventiveAuthorize
   public function authorize_count($data)
   {
     $sql = "SELECT COUNT(*) FROM factory.preventive_authorize
-    WHERE user = ?
+    WHERE user_id = ?
     AND type = ?";
     $stmt = $this->dbcon->prepare($sql);
     $stmt->execute($data);
@@ -26,7 +26,7 @@ class PreventiveAuthorize
 
   public function authorize_create($data)
   {
-    $sql = "INSERT INTO factory.preventive_authorize( `user`, `type`) VALUES(?,?)";
+    $sql = "INSERT INTO factory.preventive_authorize( `user_id`, `type`) VALUES(?,?)";
     $stmt = $this->dbcon->prepare($sql);
     return $stmt->execute($data);
   }
@@ -58,7 +58,7 @@ class PreventiveAuthorize
     $limit_length = (isset($_POST['length']) ? $_POST['length'] : '');
     $draw = (isset($_POST['draw']) ? $_POST['draw'] : '');
 
-    $sql = "SELECT a.id,CONCAT(b.firstname,' ',b.lastname) username,
+    $sql = "SELECT a.id,a.user_id,CONCAT('คุณ',b.Emp_Name,' ',b.Emp_Surname) fullname,
     (
     CASE
       WHEN a.type = 1 THEN 'ผู้อนุมัติ / ผู้ตรวจสอบ'
@@ -74,12 +74,12 @@ class PreventiveAuthorize
     END
     ) type_color
     FROM factory.preventive_authorize a
-    LEFT JOIN factory.user b
-    ON a.user = b.id
+    LEFT JOIN demo_erp_new.employee_detail b
+    ON a.user_id = b.Emp_ID
     WHERE a.status = 1 ";
 
     if ($keyword) {
-      $sql .= " AND (b.firstname LIKE '%{$keyword}%' OR b.lastname LIKE '%{$keyword}%') ";
+      $sql .= " AND (b.Emp_Name LIKE '%{$keyword}%' OR b.Emp_Surname LIKE '%{$keyword}%') ";
     }
 
     if ($filter_order) {
@@ -107,7 +107,7 @@ class PreventiveAuthorize
       $data[] = [
         $action,
         $type,
-        $row['username'],
+        $row['fullname'],
       ];
     }
 
@@ -119,21 +119,5 @@ class PreventiveAuthorize
     ];
 
     return $output;
-  }
-
-  public function user_select($keyword)
-  {
-    $sql = "SELECT a.login id,CONCAT(a.firstname,' ',a.lastname) text
-    FROM factory.user a
-    LEFT JOIN factory.login b
-    ON a.login = b.id
-    WHERE b.status = 1";
-    if (!empty($keyword)) {
-      $sql .= " AND (a.firstname LIKE '%{$keyword}%' OR a.lastname LIKE '{$keyword}') ";
-    }
-    $sql .= " ORDER BY a.firstname";
-    $stmt = $this->dbcon->prepare($sql);
-    $stmt->execute();
-    return $stmt->fetchAll();
   }
 }

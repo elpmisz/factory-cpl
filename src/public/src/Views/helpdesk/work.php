@@ -186,6 +186,205 @@ $spares = $HELPDESK->spares_view([$uuid]);
                 </div>
               </div>
 
+              <?php if (intval($row['asset']) === 1) : ?>
+                <hr>
+                <div class="h5 text-primary">ตรวจสภาพเครื่องก่อนดำเนินการซ่อม</div>
+                <div class="row">
+                  <div class="col-xl-6">
+                    <div class="row mb-2">
+                      <label class="col-xl-4 col-form-label">ระดับน้ำมัน</label>
+                      <div class="col-xl-8">
+                        <div class="row">
+                          <div class="col-xl-6">
+                            <div class="form-check pt-2">
+                              <input class="form-check-input" type="radio" value="1" name="oil" id="oil-pass" <?php echo ($row['oil'] === 1 ? "checked" : "") ?> required>
+                              <label class="form-check-label" for="oil-pass">
+                                <span class="text-success">ปกติ</span>
+                              </label>
+                            </div>
+                          </div>
+                          <div class="col-xl-6">
+                            <div class="form-check pt-2">
+                              <input class="form-check-input" type="radio" value="2" name="oil" id="oil-nopass" <?php echo ($row['oil'] === 2 ? "checked" : "") ?> required>
+                              <label class="form-check-label" for="oil-nopass">
+                                <span class="text-danger">ต่ำ</span>
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="row mb-2">
+                      <label class="col-xl-4 col-form-label">สายไฟ</label>
+                      <div class="col-xl-8">
+                        <div class="row">
+                          <div class="col-xl-6">
+                            <div class="form-check pt-2">
+                              <input class="form-check-input" type="radio" value="1" name="cable" id="cable-pass" <?php echo ($row['cable'] === 1 ? "checked" : "") ?> required>
+                              <label class="form-check-label" for="cable-pass">
+                                <span class="text-success">ปกติ</span>
+                              </label>
+                            </div>
+                          </div>
+                          <div class="col-xl-6">
+                            <div class="form-check pt-2">
+                              <input class="form-check-input" type="radio" value="2" name="cable" id="cable-nopass" <?php echo ($row['cable'] === 2 ? "checked" : "") ?> required>
+                              <label class="form-check-label" for="cable-nopass">
+                                <span class="text-danger">ชำรุด</span>
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="row mb-2">
+                      <label class="col-xl-4 col-form-label">อุปกรณ์</label>
+                      <div class="col-xl-8">
+                        <div class="row">
+                          <div class="col-xl-6">
+                            <div class="form-check pt-2">
+                              <input class="form-check-input" type="radio" value="1" name="tool" id="tool-pass" <?php echo ($row['tool'] === 1 ? "checked" : "") ?> required>
+                              <label class="form-check-label" for="tool-pass">
+                                <span class="text-success">ปกติ</span>
+                              </label>
+                            </div>
+                          </div>
+                          <div class="col-xl-6">
+                            <div class="form-check pt-2">
+                              <input class="form-check-input" type="radio" value="2" name="tool" id="tool-nopass" <?php echo ($row['tool'] === 2 ? "checked" : "") ?> required>
+                              <label class="form-check-label" for="tool-nopass">
+                                <span class="text-danger">ชำรุด</span>
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-xl-6">
+                    <div class="row mb-2">
+                      <label class="col-xl-4 col-form-label">การทำงาน</label>
+                      <div class="col-xl-8">
+                        <div class="row">
+                          <div class="col-xl-6">
+                            <div class="form-check pt-2">
+                              <input class="form-check-input" type="radio" value="1" name="work" id="work-pass" <?php echo ($row['work'] === 1 ? "checked" : "") ?> required>
+                              <label class="form-check-label" for="work-pass">
+                                <span class="text-success">ปกติ</span>
+                              </label>
+                            </div>
+                          </div>
+                          <div class="col-xl-6">
+                            <div class="form-check pt-2">
+                              <input class="form-check-input" type="radio" value="2" name="work" id="work-nopass" <?php echo ($row['work'] === 2 ? "checked" : "") ?> required>
+                              <label class="form-check-label" for="work-nopass">
+                                <span class="text-danger">ผิดปกติ</span>
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="row">
+                      <label class="col-xl-4 col-form-label">การแก้ไข</label>
+                    </div>
+                    <div class="row mb-2">
+                      <div class="col-xl-4">
+                        <div class="form-check pt-2">
+                          <input class="form-check-input" type="radio" value="1" name="fix" id="fix-change" <?php echo ($row['fix'] === 1 ? "checked" : "") ?> required>
+                          <label class="form-check-label" for="fix-change">
+                            <span class="text-success">เปลี่ยนอะไหล่สิ้นเปลือง</span>
+                          </label>
+                        </div>
+                      </div>
+                      <div class="col-xl-4">
+                        <div class="form-check pt-2">
+                          <input class="form-check-input" type="radio" value="2" name="fix" id="fix-pass" <?php echo ($row['fix'] === 2 ? "checked" : "") ?> required>
+                          <label class="form-check-label" for="fix-pass">
+                            <span class="text-primary">ซ่อมภายใน</span>
+                          </label>
+                        </div>
+                      </div>
+                      <div class="col-xl-4">
+                        <div class="form-check pt-2">
+                          <input class="form-check-input" type="radio" value="3" name="fix" id="fix-nopass" <?php echo ($row['fix'] === 3 ? "checked" : "") ?> required>
+                          <label class="form-check-label" for="fix-nopass">
+                            <span class="text-danger">ซ่อมภายนอก</span>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-xl-6">
+                    <div class="row mb-2">
+                      <label class="col-xl-4 col-form-label">ปัญหาที่เกิดขึ้นคือ</label>
+                      <div class="col-xl-8">
+                        <textarea class="form-control form-control-sm" name="what_problem" rows="4" required><?php echo (!empty($row['what']) ? $row['what'] : "") ?></textarea>
+                        <div class="invalid-feedback">
+                          กรุณากรอกข้อมูล!
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row mb-2">
+                      <label class="col-xl-4 col-form-label">ทำไมจึงเกิดปัญหา</label>
+                      <div class="col-xl-8">
+                        <textarea class="form-control form-control-sm" name="why_problem" rows="4" required><?php echo (!empty($row['why']) ? $row['why'] : "") ?></textarea>
+                        <div class="invalid-feedback">
+                          กรุณากรอกข้อมูล!
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-xl-6">
+                    <div class="row mb-2">
+                      <label class="col-xl-4 col-form-label">ถ้าปล่อยทิ้งไว้จะเกิดอะไร</label>
+                      <div class="col-xl-8">
+                        <textarea class="form-control form-control-sm" name="when_problem" rows="4" required><?php echo (!empty($row['when']) ? $row['when'] : "") ?></textarea>
+                        <div class="invalid-feedback">
+                          กรุณากรอกข้อมูล!
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-xl-6">
+                    <div class="row mb-2">
+                      <label class="col-xl-4 col-form-label">ใบจ่ายของเลขที่</label>
+                      <div class="col-xl-8">
+                        <select class="form-control form-control-sm pay-select" name="pay">
+                          <?php
+                          if (!empty($row['pay'])) {
+                            echo "<option value='{$row['pay']}'>{$row['pay']}</option>";
+                          }
+                          ?>
+                        </select>
+                        <div class="invalid-feedback">
+                          กรุณากรอกข้อมูล!
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-xl-6">
+                    <div class="row mb-2">
+                      <label class="col-xl-4 col-form-label">ใบ PR เลขที่</label>
+                      <div class="col-xl-8">
+                        <input type="text" class="form-control form-control-sm" name="pr" value="<?php echo $row['pr'] ?>">
+                        <div class="invalid-feedback">
+                          กรุณากรอกข้อมูล!
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              <?php endif; ?>
+
               <hr>
               <div class="h5 text-primary">รายละเอียดการดำเนินการ</div>
               <div class="row mb-2">
@@ -215,7 +414,7 @@ $spares = $HELPDESK->spares_view([$uuid]);
                         <td class="text-center"><?php echo $process['start'] ?></td>
                         <td class="text-center"><?php echo $process['end'] ?></td>
                         <td><?php echo str_replace("\r\n", "<br>", $process['text']) ?></td>
-                        <td class="text-right"><?php echo $process['cost'] ?></td>
+                        <td class="text-right"><?php echo (intval($process['cost']) === 0 ? "-" : $process['cost']) ?></td>
                         <td class="text-center"><?php echo $process['worker'] ?></td>
                         <td class="text-center">
                           <?php if (!empty($process['file'])) : ?>
@@ -230,6 +429,7 @@ $spares = $HELPDESK->spares_view([$uuid]);
                   </table>
                 </div>
               </div>
+
 
               <hr>
               <div class="h5 text-danger">อุปกรณ์ที่เปลี่ยน</div>
@@ -277,6 +477,7 @@ $spares = $HELPDESK->spares_view([$uuid]);
                   </div>
                 </div>
               </div>
+
 
               <hr>
               <div class="h5 text-danger">การดำเนินการ</div>
@@ -440,6 +641,24 @@ $spares = $HELPDESK->spares_view([$uuid]);
     width: "100%",
     ajax: {
       url: "/helpdesk/authorize/user-select",
+      method: "POST",
+      dataType: "json",
+      delay: 100,
+      processResults: function(data) {
+        return {
+          results: data
+        };
+      },
+      cache: true
+    }
+  });
+
+  $(".pay-select").select2({
+    placeholder: "-- บริการ --",
+    allowClear: true,
+    width: "100%",
+    ajax: {
+      url: "/helpdesk/pay-select",
       method: "POST",
       dataType: "json",
       delay: 100,

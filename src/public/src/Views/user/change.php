@@ -2,13 +2,6 @@
 $menu = "user";
 $page = "user-change";
 include_once(__DIR__ . "/../layout/header.php");
-
-use App\Classes\User;
-
-$USER = new User();
-
-$row = $USER->user_view($email);
-$uuid = (!empty($row['uuid']) ? $row['uuid'] : "");
 ?>
 
 <div class="row">
@@ -21,9 +14,9 @@ $uuid = (!empty($row['uuid']) ? $row['uuid'] : "");
         <form action="/user/change" method="POST" class="needs-validation" novalidate enctype="multipart/form-data">
 
           <div class="row mb-2" style="display: none;">
-            <label class="col-xl-2 offset-xl-2 col-form-label">UUID</label>
+            <label class="col-xl-2 offset-xl-2 col-form-label">USER_ID</label>
             <div class="col-xl-4">
-              <input type="text" class="form-control form-control-sm" name="uuid" value="<?php echo $uuid ?>" readonly>
+              <input type="text" class="form-control form-control-sm" name="user_id" value="<?php echo $user_id ?>" readonly>
             </div>
           </div>
           <div class="row mb-2">

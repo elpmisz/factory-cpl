@@ -88,13 +88,8 @@ $spares = $HELPDESK->spares_view([$uuid]);
                 <hr>
                 <div class="row mb-2 asset-div">
                   <label class="col-xl-2 col-form-label">ทรัพย์สิน</label>
-                  <div class="col-xl-6">
-                    <select class="form-control form-control-sm asset-select" name="asset">
-                      <?php echo "<option value='{$row['asset_id']}'>{$row['asset_name']}</option>"; ?>
-                    </select>
-                    <div class="invalid-feedback">
-                      กรุณากรอกข้อมูล!
-                    </div>
+                  <div class="col-xl-6 text-underline">
+                    <?php echo $row['asset_name'] ?>
                   </div>
                 </div>
 
@@ -328,4 +323,4 @@ $spares = $HELPDESK->spares_view([$uuid]);
 </div>
 
 
-<?php include_once(__DIR__ . "/../layout/footer.php"); ?>
+<?php include_once(__DIR__ . "/../layout/footer.php"); ?>>

@@ -11,6 +11,8 @@ $PREVENTIVE = new Preventive();
 $row = $PREVENTIVE->preventive_view([$uuid]);
 $worker = $PREVENTIVE->worker_view([$uuid]);
 $machine = $PREVENTIVE->machine_view([$uuid]);
+$processes = $PREVENTIVE->process_view([$uuid]);
+$checklist_count = $PREVENTIVE->checklist_check([$row['type_id']]);
 ?>
 
 <div class="row">
@@ -149,9 +151,13 @@ $machine = $PREVENTIVE->machine_view([$uuid]);
                               <?php endif; ?>
                             </td>
                             <td class="text-center">
-                              <a href="javascript:void(0)" class="badge badge-primary font-weight-light checklist-form" id="<?php echo $mc['id'] ?>">
-                                รายการตรวจสอบ
-                              </a>
+                              <?php if (!empty($checklist_count)) : ?>
+                                <a href="javascript:void(0)" class="badge badge-primary font-weight-light checklist-form" id="<?php echo $mc['id'] ?>">
+                                  รายการตรวจสอบ
+                                </a>
+                              <?php else : ?>
+                                -
+                              <?php endif; ?>
                             </td>
                           </tr>
                       <?php
@@ -173,6 +179,39 @@ $machine = $PREVENTIVE->machine_view([$uuid]);
                   </div>
                 </div>
               </div>
+
+              <?php if (COUNT($processes) > 0) : ?>
+                <hr>
+                <div class="h5 text-primary">รายละเอียดการดำเนินการ</div>
+                <div class="row mb-2">
+                  <div class="table-responsive">
+                    <table class="table table-sm table-bordered table-hover">
+                      <thead>
+                        <tr>
+                          <th width="10%">#</th>
+                          <th width="40%">รายละเอียด</th>
+                          <th width="20%">ผู้ดำเนินการ</th>
+                          <th width="10%">วันที่</th>
+                        </tr>
+                      </thead>
+                      <?php
+                      foreach ($processes as $process) :
+                      ?>
+                        <tr>
+                          <td class="text-center">
+                            <span class="badge badge-<?php echo $process['status_color'] ?> font-weight-light">
+                              <?php echo $process['status_name'] ?>
+                            </span>
+                          </td>
+                          <td><?php echo str_replace("\r\n", "<br>", $process['text']) ?></td>
+                          <td class="text-center"><?php echo $process['worker'] ?></td>
+                          <td><?php echo $process['created'] ?></td>
+                        </tr>
+                      <?php endforeach; ?>
+                    </table>
+                  </div>
+                </div>
+              <?php endif; ?>
 
               <div class="h5 text-danger">กรุณาเลือกการดำเนินการ</div>
               <div class="row mb-2">

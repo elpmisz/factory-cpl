@@ -14,28 +14,31 @@ services:
     container_name: factory-server
     restart: unless-stopped
     ports:
-      - 8000:80
+      - 9000:80
     volumes:
       - ../src:/var/www
       - ./nginx:/etc/nginx/conf.d
-
-  database:
-    image: mariadb:latest
-    container_name: factory-database
-    restart: unless-stopped
-    ports:
-      - 3308:3306
-    command: ["--sql_mode="]
-    environment:
-      MARIADB_ROOT_PASSWORD: P@ssw0rd#db
-      TZ: Asia/Bangkok 
 
   phpmyadmin:
     image: phpmyadmin:latest
     container_name: factory-phpmyadmin
     restart: unless-stopped
     ports:
-      - 8001:80
+      - 9001:80
     environment:
       PMA_HOST: database
+      UPLOAD_LIMIT: 20M
+
+  database:
+    image: mariadb:latest
+    container_name: factory-database
+    restart: unless-stopped
+    ports:
+      - 3309:3306
+    command: ["--sql_mode="]
+    environment:
+      MARIADB_ROOT_PASSWORD: P@ssw0rd#db
+      TZ: Asia/Bangkok 
+
+
   

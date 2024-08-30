@@ -19,7 +19,7 @@ try {
     die(header("Location: /"));
   }
   $decode = JWT::decode($jwt, new Key(JWT_SECRET, JWT_ALGO));
-  $email = (isset($decode->data) ? $decode->data : "");
+  $username = (isset($decode->data) ? $decode->data : "");
 } catch (Exception $e) {
   $msg = $e->getMessage();
   if ($msg === "Expired token") {
@@ -35,7 +35,7 @@ $param = (isset($params) ? explode("/", $params) : header("Location: /error"));
 $action = (isset($param[0]) ? $param[0] : die(header("Location: /error")));
 $param1 = (isset($param[1]) ? $param[1] : "");
 $param2 = (isset($param[2]) ? $param[2] : "");
-$user = $USER->user_view($email);
+$user = $USER->user_view([$username]);
 
 if ($action === "create") {
   try {
@@ -49,7 +49,7 @@ if ($action === "create") {
     $status = (intval($approve_check) === 1 ? 1 : 2);
     $line_token = $HELPDESK->line_token([$service_id]);
 
-    $count = $HELPDESK->helpdesk_count([$user_id, $service, $text]);
+    $count = $HELPDESK->helpdesk_count([$user_id, $service_id, $text]);
     if (intval($count) > 0) {
       $VALIDATION->alert("danger", "ข้อมูลซ้ำในระบบ!", "/helpdesk");
     }
@@ -57,43 +57,47 @@ if ($action === "create") {
     $HELPDESK->helpdesk_add([$last, $user_id, $service_id, $asset, $contact, $text, $status]);
     $request_id = $HELPDESK->last_insert_id();
 
-    foreach ($_POST['item_id'] as $key => $value) {
-      $item_id = (isset($_POST['item_id'][$key]) ? $VALIDATION->input($_POST['item_id'][$key]) : "");
-      $item_type = (isset($_POST['item_type'][$key]) ? $VALIDATION->input($_POST['item_type'][$key]) : "");
-      $item_value = (isset($_POST['item_value'][$key]) ? $VALIDATION->input($_POST['item_value'][$key]) : "");
-      $item_value = (intval($item_type) === 4 ?
-        date("Y-m-d", strtotime(str_replace("/", "-", $item_value))) : $item_value);
+    if (isset($_POST['item_id']) && !empty($_POST['item_id'])) {
+      foreach ($_POST['item_id'] as $key => $value) {
+        $item_id = (isset($_POST['item_id'][$key]) ? $VALIDATION->input($_POST['item_id'][$key]) : "");
+        $item_type = (isset($_POST['item_type'][$key]) ? $VALIDATION->input($_POST['item_type'][$key]) : "");
+        $item_value = (isset($_POST['item_value'][$key]) ? $VALIDATION->input($_POST['item_value'][$key]) : "");
+        $item_value = (intval($item_type) === 4 ?
+          date("Y-m-d", strtotime(str_replace("/", "-", $item_value))) : $item_value);
 
-      $count = $HELPDESK->item_count([$request_id, $item_id]);
-      if (intval($count) === 0 && !empty($item_value)) {
-        $HELPDESK->item_add([$request_id, $item_id, $item_type, $item_value]);
+        $count = $HELPDESK->item_count([$request_id, $item_id]);
+        if (intval($count) === 0 && !empty($item_value)) {
+          $HELPDESK->item_add([$request_id, $item_id, $item_type, $item_value]);
+        }
       }
     }
 
-    foreach ($_FILES['file']['name'] as $key => $row) {
-      $file_name = (isset($_FILES['file']['name']) ? $_FILES['file']['name'][$key] : "");
-      $file_tmp = (isset($_FILES['file']['tmp_name']) ? $_FILES['file']['tmp_name'][$key] : "");
-      $file_random = md5(microtime());
-      $file_image = ["png", "jpeg", "jpg"];
-      $file_document = ["pdf", "doc", "docx", "xls", "xlsx"];
-      $file_allow = array_merge($file_image, $file_document);
-      $file_extension = pathinfo(strtolower($file_name), PATHINFO_EXTENSION);
+    if (isset($_FILES['file']['name']) && !empty($_FILES['file']['name'])) {
+      foreach ($_FILES['file']['name'] as $key => $row) {
+        $file_name = (isset($_FILES['file']['name']) ? $_FILES['file']['name'][$key] : "");
+        $file_tmp = (isset($_FILES['file']['tmp_name']) ? $_FILES['file']['tmp_name'][$key] : "");
+        $file_random = md5(microtime());
+        $file_image = ["png", "jpeg", "jpg"];
+        $file_document = ["pdf", "doc", "docx", "xls", "xlsx"];
+        $file_allow = array_merge($file_image, $file_document);
+        $file_extension = pathinfo(strtolower($file_name), PATHINFO_EXTENSION);
 
-      if (!empty($file_name) && in_array($file_extension, $file_allow)) {
-        if (in_array($file_extension, $file_document)) {
-          $file_rename = "{$file_random}.{$file_extension}";
-          $file_path = (__DIR__ . "/../../Publics/helpdesk/{$file_rename}");
-          move_uploaded_file($file_tmp, $file_path);
-        }
-        if (in_array($file_extension, $file_image)) {
-          $file_rename = "{$file_random}.webp";
-          $file_path = (__DIR__ . "/../../Publics/helpdesk/{$file_rename}");
-          $VALIDATION->image_upload($file_tmp, $file_path);
-        }
+        if (!empty($file_name) && in_array($file_extension, $file_allow)) {
+          if (in_array($file_extension, $file_document)) {
+            $file_rename = "{$file_random}.{$file_extension}";
+            $file_path = (__DIR__ . "/../../Publics/helpdesk/{$file_rename}");
+            move_uploaded_file($file_tmp, $file_path);
+          }
+          if (in_array($file_extension, $file_image)) {
+            $file_rename = "{$file_random}.webp";
+            $file_path = (__DIR__ . "/../../Publics/helpdesk/{$file_rename}");
+            $VALIDATION->image_upload($file_tmp, $file_path);
+          }
 
-        $count = $HELPDESK->file_count([$request_id, $file_rename]);
-        if (intval($count) === 0 && !empty($file_rename)) {
-          $HELPDESK->file_add([$request_id, $file_rename]);
+          $count = $HELPDESK->file_count([$request_id, $file_rename]);
+          if (intval($count) === 0 && !empty($file_rename)) {
+            $HELPDESK->file_add([$request_id, $file_rename]);
+          }
         }
       }
     }
@@ -132,44 +136,48 @@ if ($action === "update") {
     $asset = (isset($_POST['asset']) ? $VALIDATION->input($_POST['asset']) : "");
     $text = (isset($_POST['text']) ? $VALIDATION->input($_POST['text']) : "");
 
-    $HELPDESK->helpdesk_update([$asset, $contact, $text, $uuid]);
+    $HELPDESK->helpdesk_view_update([$asset, $contact, $text, $uuid]);
 
-    foreach ($_POST['item_id'] as $key => $value) {
-      $item_id = (isset($_POST['item_id'][$key]) ? $VALIDATION->input($_POST['item_id'][$key]) : "");
-      $item_type = (isset($_POST['item_type'][$key]) ? $VALIDATION->input($_POST['item_type'][$key]) : "");
-      $item_value = (isset($_POST['item_value'][$key]) ? $VALIDATION->input($_POST['item_value'][$key]) : "");
-      $item_value = (intval($item_type) === 4 ?
-        date("Y-m-d", strtotime(str_replace("/", "-", $item_value))) : $item_value);
+    if (isset($_POST['item_id']) && !empty($_POST['item_id'])) {
+      foreach ($_POST['item_id'] as $key => $value) {
+        $item_id = (isset($_POST['item_id'][$key]) ? $VALIDATION->input($_POST['item_id'][$key]) : "");
+        $item_type = (isset($_POST['item_type'][$key]) ? $VALIDATION->input($_POST['item_type'][$key]) : "");
+        $item_value = (isset($_POST['item_value'][$key]) ? $VALIDATION->input($_POST['item_value'][$key]) : "");
+        $item_value = (intval($item_type) === 4 ?
+          date("Y-m-d", strtotime(str_replace("/", "-", $item_value))) : $item_value);
 
-      if (!empty($item_id)) {
-        $HELPDESK->item_update([$item_value, $item_id]);
+        if (!empty($item_id)) {
+          $HELPDESK->item_update([$item_value, $item_id]);
+        }
       }
     }
 
-    foreach ($_FILES['file']['name'] as $key => $row) {
-      $file_name = (isset($_FILES['file']['name']) ? $_FILES['file']['name'][$key] : "");
-      $file_tmp = (isset($_FILES['file']['tmp_name']) ? $_FILES['file']['tmp_name'][$key] : "");
-      $file_random = md5(microtime());
-      $file_image = ["png", "jpeg", "jpg"];
-      $file_document = ["pdf", "doc", "docx", "xls", "xlsx"];
-      $file_allow = array_merge($file_image, $file_document);
-      $file_extension = pathinfo(strtolower($file_name), PATHINFO_EXTENSION);
+    if (isset($_FILES['file']['name']) && !empty($_FILES['file']['name'])) {
+      foreach ($_FILES['file']['name'] as $key => $row) {
+        $file_name = (isset($_FILES['file']['name']) ? $_FILES['file']['name'][$key] : "");
+        $file_tmp = (isset($_FILES['file']['tmp_name']) ? $_FILES['file']['tmp_name'][$key] : "");
+        $file_random = md5(microtime());
+        $file_image = ["png", "jpeg", "jpg"];
+        $file_document = ["pdf", "doc", "docx", "xls", "xlsx"];
+        $file_allow = array_merge($file_image, $file_document);
+        $file_extension = pathinfo(strtolower($file_name), PATHINFO_EXTENSION);
 
-      if (!empty($file_name) && in_array($file_extension, $file_allow)) {
-        if (in_array($file_extension, $file_document)) {
-          $file_rename = "{$file_random}.{$file_extension}";
-          $file_path = (__DIR__ . "/../../Publics/helpdesk/{$file_rename}");
-          move_uploaded_file($file_tmp, $file_path);
-        }
-        if (in_array($file_extension, $file_image)) {
-          $file_rename = "{$file_random}.webp";
-          $file_path = (__DIR__ . "/../../Publics/helpdesk/{$file_rename}");
-          $VALIDATION->image_upload($file_tmp, $file_path);
-        }
+        if (!empty($file_name) && in_array($file_extension, $file_allow)) {
+          if (in_array($file_extension, $file_document)) {
+            $file_rename = "{$file_random}.{$file_extension}";
+            $file_path = (__DIR__ . "/../../Publics/helpdesk/{$file_rename}");
+            move_uploaded_file($file_tmp, $file_path);
+          }
+          if (in_array($file_extension, $file_image)) {
+            $file_rename = "{$file_random}.webp";
+            $file_path = (__DIR__ . "/../../Publics/helpdesk/{$file_rename}");
+            $VALIDATION->image_upload($file_tmp, $file_path);
+          }
 
-        $count = $HELPDESK->file_count([$id, $file_rename]);
-        if (intval($count) === 0 && !empty($file_rename)) {
-          $HELPDESK->file_add([$id, $file_rename]);
+          $count = $HELPDESK->file_count([$id, $file_rename]);
+          if (intval($count) === 0 && !empty($file_rename)) {
+            $HELPDESK->file_add([$id, $file_rename]);
+          }
         }
       }
     }
@@ -218,7 +226,16 @@ if ($action === "work") {
     $id = (isset($_POST['id']) ? $VALIDATION->input($_POST['id']) : "");
     $uuid = (isset($_POST['uuid']) ? $VALIDATION->input($_POST['uuid']) : "");
     $service_id = (isset($_POST['service_id']) ? $VALIDATION->input($_POST['service_id']) : "");
-    $status = (isset($_POST['status']) ? $VALIDATION->input($_POST['status']) : "");
+    $oil = (isset($_POST['oil']) ? $VALIDATION->input($_POST['oil']) : "");
+    $cable = (isset($_POST['cable']) ? $VALIDATION->input($_POST['cable']) : "");
+    $tool = (isset($_POST['tool']) ? $VALIDATION->input($_POST['tool']) : "");
+    $work = (isset($_POST['work']) ? $VALIDATION->input($_POST['work']) : "");
+    $fix = (isset($_POST['fix']) ? $VALIDATION->input($_POST['fix']) : "");
+    $what = (isset($_POST['what_problem']) ? $VALIDATION->input($_POST['what_problem']) : "");
+    $why = (isset($_POST['why_problem']) ? $VALIDATION->input($_POST['why_problem']) : "");
+    $when = (isset($_POST['when_problem']) ? $VALIDATION->input($_POST['when_problem']) : "");
+    $pay = (isset($_POST['pay']) ? $VALIDATION->input($_POST['pay']) : "");
+    $pr = (isset($_POST['pr']) ? $VALIDATION->input($_POST['pr']) : "");
     $remark = (isset($_POST['remark']) ? $VALIDATION->input($_POST['remark']) : "");
     $date = (isset($_POST['date']) ? $VALIDATION->input($_POST['date']) : "");
     $date = (!empty($date) ? date("Y-m-d", strtotime(str_replace("/", "-", $date))) : "");
@@ -228,18 +245,19 @@ if ($action === "work") {
     $checker_check = $HELPDESK->checker_check([$service_id]);
     $status = (intval($status) !== 7 ? $status : (intval($status) === 7 && intval($checker_check) === 1 ? 7 : 8));
 
-    foreach ($_POST['item_code'] as $key => $value) {
-      $item_code = (isset($_POST['item_code'][$key]) ? $VALIDATION->input($_POST['item_code'][$key]) : "");
-      $item_quantity = (isset($_POST['item_quantity'][$key]) ? $VALIDATION->input($_POST['item_quantity'][$key]) : "");
+    if (isset($_POST['item_code']) && !empty($_POST['item_code'])) {
+      foreach ($_POST['item_code'] as $key => $value) {
+        $item_code = (isset($_POST['item_code'][$key]) ? $VALIDATION->input($_POST['item_code'][$key]) : "");
+        $item_quantity = (isset($_POST['item_quantity'][$key]) ? $VALIDATION->input($_POST['item_quantity'][$key]) : "");
 
-      $count = $HELPDESK->spare_count([$id, $item_code]);
-      if (intval($count) === 0 && !empty($item_code)) {
-        $HELPDESK->spare_add([$id, $item_code, $item_quantity]);
+        $count = $HELPDESK->spare_count([$id, $item_code]);
+        if (intval($count) === 0 && !empty($item_code)) {
+          $HELPDESK->spare_add([$id, $item_code, $item_quantity]);
+        }
       }
     }
 
-    $file_name = (isset($_FILES['file']['name']) ? $_FILES['file']['name'] : "");
-    if (!empty($file_name)) {
+    if (isset($_FILES['file']['tmp_name']) && !empty($_FILES['file']['tmp_name'])) {
       $file_tmp = (isset($_FILES['file']['tmp_name']) ? $_FILES['file']['tmp_name'] : "");
       $file_random = md5(microtime());
       $file_image = ["png", "jpeg", "jpg"];
@@ -262,7 +280,7 @@ if ($action === "work") {
     }
     $file_rename = (!empty($file_rename) ? $file_rename : "");
 
-    $HELPDESK->status_update([$status, $uuid]);
+    $HELPDESK->helpdesk_work_update([$oil, $cable, $tool, $work, $fix, $what, $why, $when, $pay, $pr, $status, $uuid]);
     $HELPDESK->process_add([$id, $worker_id, $remark, $date, $cost, $file_rename, $status]);
     $VALIDATION->alert("success", "ดำเนินการเรียบร้อย!", "/helpdesk");
   } catch (PDOException $e) {
@@ -443,6 +461,16 @@ if ($action === "spare-select") {
   try {
     $keyword = (isset($_POST['q']) ? $VALIDATION->input($_POST['q']) : "");
     $result = $HELPDESK->spare_select($keyword);
+    echo json_encode($result);
+  } catch (PDOException $e) {
+    die($e->getMessage());
+  }
+}
+
+if ($action === "pay-select") {
+  try {
+    $keyword = (isset($_POST['q']) ? $VALIDATION->input($_POST['q']) : "");
+    $result = $HELPDESK->pay_select($keyword);
     echo json_encode($result);
   } catch (PDOException $e) {
     die($e->getMessage());

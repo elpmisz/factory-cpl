@@ -20,27 +20,29 @@ $users = $USER->user_read();
                 <thead>
                   <tr>
                     <th width="10%">#</th>
-                    <th width="30%">ชื่อ</th>
+                    <th width="20%">ชื่อ</th>
+                    <th width="20%">ฝ่าย</th>
                     <?php foreach ($services as $service) : ?>
                       <th><?php echo $service['name'] ?></th>
                     <?php endforeach; ?>
                   </tr>
-                  <?php foreach ($users as $us) :  ?>
+                  <?php foreach ($users as $row) :  ?>
                     <tr>
                       <form action="/auth/update" method="POST">
                         <td class="text-center">
                           <button class="btn btn-success btn-sm" type="submit"><i class="fa fa-check"></i></button>
-                          <input type="hidden" name="uuid" value="<?php echo $us['uuid'] ?>" readonly>
+                          <input type="hidden" name="user_id" value="<?php echo $row['user_id'] ?>" readonly>
                         </td>
-                        <td><?php echo $us['fullname'] ?></td>
+                        <td><?php echo $row['fullname'] ?></td>
+                        <td><?php echo $row['department_name'] ?></td>
                         <?php
-                        $auths = explode(",", $us['auth']);
+                        $auth = explode(",", $row['service']);
                         foreach ($services as $key => $value) :
-                          $checked = (isset($auths[$key]) ? $auths[$key] : "");
+                          $checked = (isset($auth[$key]) ? $auth[$key] : "");
                         ?>
                           <td class="text-center">
-                            <input type="hidden" name="<?php echo "auth[{$key}]" ?>" value="0">
-                            <input type="checkbox" name="<?php echo "auth[{$key}]" ?>" value="1" <?php echo (intval($checked) === 1 ? "checked" : "") ?>>
+                            <input type="hidden" name="<?php echo "service[{$key}]" ?>" value="0">
+                            <input type="checkbox" name="<?php echo "service[{$key}]" ?>" value="1" <?php echo (intval($checked) === 1 ? "checked" : "") ?>>
                           </td>
                         <?php endforeach; ?>
                       </form>

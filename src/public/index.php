@@ -151,6 +151,9 @@ $ROUTER->map("GET", "/preventive/check/[**:params]", function ($params) {
 $ROUTER->map("GET", "/preventive/complete/[**:params]", function ($params) {
   require(__DIR__ . "/src/Views/preventive/complete.php");
 });
+$ROUTER->map("GET", "/preventive/update/[**:params]", function ($params) {
+  require(__DIR__ . "/src/Views/preventive/script.php");
+});
 $ROUTER->map("POST", "/preventive/[**:params]", function ($params) {
   require(__DIR__ . "/src/Views/preventive/action.php");
 });
