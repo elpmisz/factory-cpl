@@ -487,7 +487,7 @@ class Helpdesk
     $stmt->execute();
     $total = $stmt->fetchColumn();
 
-    $column = ["a.id", "a.last", "b.name", "a.text", "c.firstname", "", "", "a.created"];
+    $column = ["a.id", "a.last", "b.name", "a.text", "c.firstname", "a.id", "a.id", "a.created"];
 
     $keyword = (isset($_POST['search']['value']) ? trim($_POST['search']['value']) : '');
     $filter_order = (isset($_POST['order']) ? $_POST['order'] : '');
@@ -616,7 +616,7 @@ class Helpdesk
     $stmt->execute();
     $total = $stmt->fetchColumn();
 
-    $column = ["a.id", "a.code", "a.asset_code", "a.name", "d.name", "b.name", "c.name"];
+    $column = ["a.id", "a.last", "b.name", "a.text", "c.firstname", "a.id", "a.id", "a.created"];
 
     $keyword = (isset($_POST['search']['value']) ? trim($_POST['search']['value']) : '');
     $filter_order = (isset($_POST['order']) ? $_POST['order'] : '');
@@ -726,7 +726,7 @@ class Helpdesk
     $stmt->execute();
     $total = $stmt->fetchColumn();
 
-    $column = ["a.id", "a.code", "a.asset_code", "a.name", "d.name", "b.name", "c.name"];
+    $column = ["a.id", "a.last", "b.name", "a.text", "c.firstname", "a.id", "a.id", "a.created"];
 
     $keyword = (isset($_POST['search']['value']) ? trim($_POST['search']['value']) : '');
     $filter_order = (isset($_POST['order']) ? $_POST['order'] : '');
@@ -829,7 +829,7 @@ class Helpdesk
     $stmt->execute();
     $total = $stmt->fetchColumn();
 
-    $column = ["a.id", "a.code", "a.asset_code", "a.name", "d.name", "b.name", "c.name"];
+    $column = ["a.id", "a.last", "b.name", "a.text", "c.firstname", "a.id", "a.id", "a.created"];
 
     $keyword = (isset($_POST['search']['value']) ? trim($_POST['search']['value']) : '');
     $filter_order = (isset($_POST['order']) ? $_POST['order'] : '');
@@ -950,14 +950,14 @@ class Helpdesk
     return $output;
   }
 
-  public function manage_data()
+  public function manage_data($status, $service)
   {
     $sql = "SELECT COUNT(*) FROM factory.helpdesk_request";
     $stmt = $this->dbcon->prepare($sql);
     $stmt->execute();
     $total = $stmt->fetchColumn();
 
-    $column = ["a.id", "a.code", "a.asset_code", "a.name", "d.name", "b.name", "c.name"];
+    $column = ["a.id", "a.last", "b.name", "a.text", "c.firstname", "a.id", "a.id", "a.created"];
 
     $keyword = (isset($_POST['search']['value']) ? trim($_POST['search']['value']) : '');
     $filter_order = (isset($_POST['order']) ? $_POST['order'] : '');
@@ -1025,6 +1025,12 @@ class Helpdesk
     WHERE a.id != '' ";
     if (!empty($keyword)) {
       $sql .= " AND (a.text LIKE '%{$keyword}%' OR d.name LIKE '%{$keyword}%' OR d.asset_code LIKE '%{$keyword}%' OR d.code LIKE '%{$keyword}%' OR d.serial_number LIKE '%{$keyword}%' OR CONCAT('HD',YEAR(a.created),LPAD(a.`last`,4,'0')) LIKE '%{$keyword}%') ";
+    }
+    if (!empty($status)) {
+      $sql .= " AND a.status = {$status} ";
+    }
+    if (!empty($service)) {
+      $sql .= " AND a.service_id = {$service} ";
     }
 
     if ($filter_order) {
@@ -1099,7 +1105,6 @@ class Helpdesk
 
   public function spare_select($keyword)
   {
-    global $dbmysql;
     $sql = "SELECT a.code `id`,CONCAT('[',a.code,'] ',a.name) `text`
     FROM raw_material.items a
     LEFT JOIN raw_material.item_group b 
@@ -1110,7 +1115,7 @@ class Helpdesk
       $sql .= " AND (a.code LIKE '%{$keyword}%' OR a.name LIKE '%{$keyword}%' ) ";
     }
     $sql .= " LIMIT 50 ";
-    $stmt = $dbmysql->prepare($sql);
+    $stmt = $this->dbcon->prepare($sql);
     $stmt->execute();
     return $stmt->fetchAll();
   }

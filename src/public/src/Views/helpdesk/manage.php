@@ -62,6 +62,12 @@ $card = $HELPDESK->helpdesk_card();
 
         <div class="row justify-content-end mb-2">
           <div class="col-xl-3 mb-2">
+            <select class="form-control form-control-sm status-select"></select>
+          </div>
+          <div class="col-xl-3 mb-2">
+            <select class="form-control form-control-sm service-select"></select>
+          </div>
+          <div class="col-xl-3 mb-2">
             <a href="/helpdesk/service" class="btn btn-sm btn-info btn-block">
               <i class="fa fa-file-lines pr-2"></i>หัวข้อบริการ
             </a>
@@ -112,7 +118,21 @@ $card = $HELPDESK->helpdesk_card();
 <script>
   filter_datatable();
 
-  function filter_datatable() {
+
+  $(document).on("change", ".status-select, .service-select", function() {
+    let status = ($(".status-select").val() ? $(".status-select").val() : "");
+    let service = ($(".service-select").val() ? $(".service-select").val() : "");
+
+    if (status || service) {
+      $(".manage-data").DataTable().destroy();
+      filter_datatable(status, service);
+    } else {
+      $(".manage-data").DataTable().destroy();
+      filter_datatable();
+    }
+  });
+
+  function filter_datatable(status, service) {
     $(".manage-data").DataTable({
       serverSide: true,
       searching: true,
@@ -121,6 +141,10 @@ $card = $HELPDESK->helpdesk_card();
       ajax: {
         url: "/helpdesk/manage-data",
         type: "POST",
+        data: {
+          status: status,
+          service: service,
+        }
       },
       columnDefs: [{
         targets: [0, 1],
@@ -142,4 +166,40 @@ $card = $HELPDESK->helpdesk_card();
       },
     });
   };
+
+  $(".status-select").select2({
+    placeholder: "-- สถานะ --",
+    allowClear: true,
+    width: "100%",
+    ajax: {
+      url: "/helpdesk/status-select",
+      method: "POST",
+      dataType: "json",
+      delay: 100,
+      processResults: function(data) {
+        return {
+          results: data
+        };
+      },
+      cache: true
+    }
+  });
+
+  $(".service-select").select2({
+    placeholder: "-- บริการ --",
+    allowClear: true,
+    width: "100%",
+    ajax: {
+      url: "/helpdesk/service-select",
+      method: "POST",
+      dataType: "json",
+      delay: 100,
+      processResults: function(data) {
+        return {
+          results: data
+        };
+      },
+      cache: true
+    }
+  });
 </script>

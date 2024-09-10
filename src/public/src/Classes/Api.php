@@ -47,7 +47,7 @@ class Api
   {
     $sql = "SELECT a.id,
     CONCAT('PM',YEAR(a.`start`),LPAD(a.`last`,4,'0')) ticket,
-    CONCAT('คุณ',b.Emp_Name,' ',b.Emp_Surname) username,d.name type_name,
+    CONCAT(b.firstname,' ',b.lastname) username,d.name type_name,
     a.`start`, a.`end`,a.text,
     e.`name` asset_name,c.`process` preventive_process,c.text preventive_text,
     (
@@ -59,8 +59,8 @@ class Api
       END
     ) status_name,a.created
     FROM factory.preventive_request a
-    LEFT JOIN demo_erp_new.employee_detail b
-    ON a.user_id = b.Emp_ID
+    LEFT JOIN factory.user b
+    ON a.user_id = b.id
     LEFT JOIN factory.preventive_request_item c
     ON a.id = c.request_id
     LEFT JOIN factory.asset_type d
@@ -76,7 +76,9 @@ class Api
   {
     $sql = "SELECT a.id,a.contact,a.text,
     CONCAT('คุณ',b.Emp_Name,' ',b.Emp_Surname) username,c.`name` service_name,
-    d.`name` asset_name,
+    d.name asset_name,e.name type_name,
+    h.name brand_name,i.name model_name,
+    f.name department_name,g.name location_name, 
     (
       CASE
         WHEN a.status IN (1,7) THEN 'รออนุมัติ / ตรวจสอบ'
@@ -92,14 +94,25 @@ class Api
       WHERE status IN (3,4,5,7) 
       AND request_id = a.id
       ORDER BY status DESC LIMIT 1
-    ) finish,a.created
+    ) finish,a.created,
+    CONCAT('HD',YEAR(a.created),LPAD(a.`last`,4,'0')) ticket
     FROM factory.helpdesk_request a
     LEFT JOIN demo_erp_new.employee_detail b
     ON a.user_id = b.Emp_ID
     LEFT JOIN factory.helpdesk_service c
     ON a.service_id = c.id 
     LEFT JOIN factory.asset d
-    ON a.asset_id = d.id";
+    ON a.asset_id = d.id
+    LEFT JOIN factory.asset_type e
+    ON d.type_id = e.id
+    LEFT JOIN factory.asset_department f
+    ON d.department_id = f.id
+    LEFT JOIN factory.asset_location g
+    ON d.location_id = g.id
+    LEFT JOIN factory.asset_brand h
+    ON d.brand_id = h.id
+    LEFT JOIN factory.asset_brand i
+    ON d.model_id = i.id";
     $stmt = $this->dbcon->prepare($sql);
     $stmt->execute();
     return $stmt->fetchAll();

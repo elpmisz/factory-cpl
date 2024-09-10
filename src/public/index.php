@@ -32,6 +32,9 @@ $ROUTER->map("POST", "/dashboard-asset/[**:params]", function ($params) {
 $ROUTER->map("GET", "/dashboard-machine", function () {
   require(__DIR__ . "/src/Views/dashboard/machine.php");
 });
+$ROUTER->map("GET", "/dashboard-machine-2003", function () {
+  require(__DIR__ . "/src/Views/dashboard/pu2003.php");
+});
 $ROUTER->map("POST", "/dashboard-machine/[**:params]", function ($params) {
   require(__DIR__ . "/src/Views/dashboard/machine-action.php");
 });

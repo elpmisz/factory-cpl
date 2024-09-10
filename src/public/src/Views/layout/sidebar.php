@@ -56,6 +56,12 @@ $setting_auth = ($page === "setting-auth" ? 'class="active"' : "");
             </li>
           <?php endif; ?>
         <?php endforeach; ?>
+        <li <?php echo $dashboard_energy ?>>
+          <a href="/dashboard-machine-2003">
+            <i class="fa fa-chart-line pr-2"></i>
+            PU 2003
+          </a>
+        </li>
       </ul>
     </li>
     <li>

@@ -394,7 +394,9 @@ if ($action === "work-data") {
 
 if ($action === "manage-data") {
   try {
-    $result = $HELPDESK->manage_data();
+    $status = (isset($_POST['status']) ? $VALIDATION->input($_POST['status']) : "");
+    $service = (isset($_POST['service']) ? $VALIDATION->input($_POST['service']) : "");
+    $result = $HELPDESK->manage_data($status,$service);
     echo json_encode($result);
   } catch (PDOException $e) {
     die($e->getMessage());
@@ -471,6 +473,25 @@ if ($action === "pay-select") {
   try {
     $keyword = (isset($_POST['q']) ? $VALIDATION->input($_POST['q']) : "");
     $result = $HELPDESK->pay_select($keyword);
+    echo json_encode($result);
+  } catch (PDOException $e) {
+    die($e->getMessage());
+  }
+}
+
+if ($action === "status-select") {
+  try {
+    $data = ['รออนุมัติ', 'รอรับเรื่อง', 'รับเรื่อง', 'อยู่ระหว่างดำเนินการ', 'รออะไหล่ / อุปกรณ์', 'รอแก้ไข', 'รอตรวจสอบ', 'ดำเนินการเรียบร้อย', 'รายการถูกยกเลิก'];
+
+    $result = [];
+    foreach ($data as $key => $value) {
+      $key++;
+      $result[] = [
+        "id" => $key,
+        "text" => $value,
+      ];
+    }
+
     echo json_encode($result);
   } catch (PDOException $e) {
     die($e->getMessage());

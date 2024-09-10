@@ -38,6 +38,11 @@ $system_name = (isset($system['name']) ? $system['name'] : "FACTORY");
           <div class="card-body">
             <form action="/login" method="POST" class="needs-validation" novalidate enctype="multipart/form-data">
               <div class="row justify-content-center my-3">
+                <div class="col-xl-6">
+                  <img src="/src/Publics/images/logo.png" class="img-fluid rounded" alt="logo">
+                </div>
+              </div>
+              <div class="row justify-content-center my-3">
                 <h3 class="text-center"><?php echo $system_name ?></h3>
               </div>
               <div class="row mb-2 mx-3">
